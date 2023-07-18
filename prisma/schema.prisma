@@ -1,0 +1,54 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id                 Int                 @id @default(autoincrement())
+  ethAddress         String              @unique
+  ensName            String?
+  farcasterHandle    String?              @unique
+  name               String?
+  bio                String?
+  curatedCollections CuratedCollection[]
+  NFT                NFT[]
+}
+
+model NFT {
+  id                 Int                    @id @default(autoincrement())
+  contractAddress    String
+  tokenId            String
+  metadataURI        String
+  imageURI           String
+  title              String
+  description        String?                @db.Text
+  ownerOf            User                   @relation(fields: [ownerId], references: [id])
+  ownerId            Int
+  ERC721             Boolean
+  ERC1155            Boolean
+  curatedCollections CuratedCollectionNFT[]
+
+  @@unique([contractAddress, tokenId])
+}
+
+model CuratedCollection {
+  id        Int                    @id @default(autoincrement())
+  curator   User                   @relation(fields: [curatorId], references: [id])
+  curatorId Int
+  NFTs      CuratedCollectionNFT[]
+}
+
+model CuratedCollectionNFT {
+  curatedCollection   CuratedCollection @relation(fields: [curatedCollectionId], references: [id])
+  curatedCollectionId Int
+  nft                 NFT               @relation(fields: [nftId], references: [id])
+  nftId               Int
+
+  @@id([curatedCollectionId, nftId])
+}

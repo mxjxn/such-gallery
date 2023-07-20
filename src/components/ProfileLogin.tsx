@@ -33,6 +33,7 @@ function Profile() {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [nameValue, setNameValue] = useState("");
   const [bioValue, setBioValue] = useState("");
+	const modalRef = React.useRef<HTMLDialogElement|null>(null);
 
   const updateNameHandler = async (e: any) => {
     e.stopPropagation();
@@ -51,10 +52,10 @@ function Profile() {
 
   const getNameValue = () => nameValue;
   return (
-    <div className="m-2">
+    <div className="p-4 flex items-center flex-row-reverse bg-transparent">
       {isConnected ? (
         <div>
-          <dialog id="my_modal_2" className="modal">
+          <dialog id="my_modal_2" className="modal" ref={modalRef}>
             <form method="dialog" className="modal-box">
               <p className="pl-0 p-2 bg-sky-950 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
@@ -162,7 +163,7 @@ function Profile() {
           </dialog>
           <div
             className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-md p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950"
-            onClick={() => window.my_modal_2.showModal()}
+            onClick={() => modalRef.current!.showModal()}
           >
             Connected to {ensName?.data ?? displayName}
           </div>

@@ -17,7 +17,7 @@ model User {
   name               String?
   bio                String?
   curatedCollections CuratedCollection[]
-  NFT                NFT[]
+  nfts                NFT[]
 }
 
 model NFT {

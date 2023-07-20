@@ -9,18 +9,20 @@ import {
   useSignMessage,
 } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "@/prisma";
+import { getUser, updateUserEns } from "@/app/users";
 
 interface UseProfileReturn {
   connect: () => Promise<void>;
   disconnect: () => void;
   isConnected: boolean;
+	address: string;
   ensName: any; // replace with actual type
   displayName: string | null;
   user: any;
   signMessage: any; // replace with actual type
+	updateProfile: Promise<any>;
   signData: any; // replace with actual type
   isError: boolean;
   isLoading: boolean;
@@ -34,7 +36,11 @@ export function useProfile(): UseProfileReturn {
   });
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
+  const [user, setUser] = useState<any>({});
+  const userAddress = user?.ethAddress;
+  const userEnsName = user?.ensName;
   const ensName = useEnsName({ address });
+  const ensData = ensName.data;
   const {
     data: signData,
     isError,
@@ -45,52 +51,43 @@ export function useProfile(): UseProfileReturn {
     message: `Such sign. Very ${address}. Wow!`,
   });
 
-  const [user, setUser] = useState(null);
-
   useEffect(() => {
-    if (isConnected) {
+    if (!userAddress && isConnected && address) {
       // Fetch the user from the database
       const fetchUser = async () => {
-        let user;
-        try {
-          user = await prisma.user.findUnique({
-            where: { ethAddress: address },
-          });
-
-          // If the user doesn't exist, create a new one
-          if (!user && address) {
-            user = await prisma.user.create({
-              data: {
-                ethAddress: address,
-                // Add other fields as necessary
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching or creating user:", error);
-        }
-
+        let userFromServer = await getUser(address);
+        console.log({ userFromServer });
         // Update the user state
-        setUser(user);
+        setUser(userFromServer);
       };
 
       fetchUser();
+    } else if (userAddress && ensData && address && userEnsName !== ensData) {
+      const updateUser = async () => {
+        let updatedUser = await updateUserEns(address, ensData);
+        setUser(updatedUser);
+        console.log({ updatedUser });
+      };
+      updateUser();
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, ensData, userAddress, userEnsName]);
 
-  useEffect(() => {
-    // console.log({signData, isError, isLoading, isSuccess});
-  }, [signData, isError, isLoading, isSuccess]);
+	//	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
+  //useEffect(() => {
+  //console.log({ensData});
+  //}, [ensData]);
 
   return {
     connect,
     disconnect,
     isConnected,
+		address: userAddress,
     ensName,
     displayName: address
       ? `${address.slice(0, 6)}...${address.slice(-4)}`
       : null,
     user,
+		updateProfile: (address: string, name: string, bio: string) => {},
     signMessage,
     signData,
     isError,

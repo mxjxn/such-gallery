@@ -1,4 +1,5 @@
-Such.Gallery is an open gallery. Artists can submit their art, anyone can curate. 
+# such-gallery
+such.gallery is an open gallery. Artists can submit their art, anyone can curate. 
 
 
 ## Getting Started
@@ -11,22 +12,26 @@ pnpm i && pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Features Roadmap
+### Features Roadmap
 
 #### Stage one
 
-- submissions taken via telegram bot
-- curating nfts that are on manifold gallery use curator's wallet for referral 
+- curating collections of nfts that are on manifold gallery use curator's wallet for referral 
+- curating 721s
 - curating Editions (Manifold & Zora)
 
 #### Stage two
 
-- central gallery for live events
-- event calendar for anyone to schedule events
-- events scheduled via @suchgallery bot on warpcast 
+- bidding and buying right in the app.
 
 #### Stage three
+- event calendar for anyone to schedule events
+- events scheduled via @suchgallery bot on warpcast 
+- central gallery for live events
 
+#### Stage four
+
+- submissions taken via telegram bot
 - oncyber-like galleries for all
 
 #### ideas for improvements

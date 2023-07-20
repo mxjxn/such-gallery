@@ -61,52 +61,62 @@ function Profile() {
               </p>
 
               {isEditingName ? (
-                <div>
+                <div className="py-2 m-0">
                   <input
                     className="input input-bordered w-full max-w-xs text-white bg-slate-900"
                     placeholder={nameValue}
                     onChange={(e) => setNameValue(e.target.value)}
                   />
                   <div
-                    className="text-white bg-red-500 inline-block p-2 m-1 rounded-lg cursor-pointer"
+                    className="text-white bg-red-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-red-200 border border-red-500 active:bg-red-400 transition-colors"
                     onClick={() => setIsEditingName(false)}
                   >
                     Cancel
                   </div>
                   <div
-                    className="text-white bg-green-500 inline-block p-2 m-1 rounded-lg cursor-pointer"
+                    className="text-white bg-green-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-green-100 border border-green-500 transition-colors active:bg-green-400"
                     onClick={updateNameHandler}
                   >
                     Save
                   </div>
                 </div>
               ) : (
-                <p onClick={() => setIsEditingName(true)}>Name: {nameValue}</p>
+                <div className="p-2 m-0 flex items-center" onClick={() => setIsEditingName(true)}>
+                  <span className="text-slate-400 text-sm pr-2 underline block w-14">
+                    Name
+                  </span>
+                  {nameValue}
+                </div>
               )}
               {isEditingBio ? (
-                <div>
+                <div className="m-0 py-2">
                   <input
                     className="input input-bordered w-full max-w-xs text-white bg-slate-900"
                     placeholder={bioValue}
                     onChange={(e) => setBioValue(e.target.value)}
                   />
                   <button
-                    className="text-white bg-green-500 btn-sm"
-                    onClick={updateBioHandler}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="text-white bg-green-500 btn-sm"
+                    className="text-white bg-red-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-red-200 border border-red-500 active:bg-red-400 transition-colors"
                     onClick={(e) => {
                       setIsEditingBio(false);
                     }}
                   >
                     Cancel
                   </button>
+                  <div
+                    className="text-white bg-green-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-green-100 border border-green-500 transition-colors active:bg-green-400"
+                    onClick={updateBioHandler}
+                  >
+                    Save
+                  </div>
                 </div>
               ) : (
-                <p onClick={() => setIsEditingBio(true)}>Bio: {bioValue}</p>
+                <p className="p-2 m-0 flex items-center" onClick={() => setIsEditingBio(true)}>
+                  <span className="text-slate-400 text-sm pr-2 underline w-14">
+                    Bio
+                  </span>
+                  {bioValue}
+                </p>
               )}
               {/*
               {isEditingName && (

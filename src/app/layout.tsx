@@ -5,8 +5,11 @@ import { WagmiConfig, createConfig, mainnet } from "wagmi";
 import { createPublicClient, http } from "viem";
 import Header from "@/components/Header";
 import { ProfileProvider } from "@/hooks/ProfileContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const config = createConfig({
+const inter = Inter({ subsets: ["latin"] });
+
+const wagmiConfig = createConfig({
   autoConnect: true,
   publicClient: createPublicClient({
     chain: mainnet,
@@ -14,7 +17,13 @@ const config = createConfig({
   }),
 });
 
-const inter = Inter({ subsets: ["latin"] });
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			refetchOnWindowFocus: false,
+		}
+	},
+});
 
 export default function RootLayout({
   children,
@@ -23,11 +32,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <WagmiConfig config={config}>
+      <WagmiConfig config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
           <body className={inter.className}>
             <Header />
             {children}
           </body>
+        </QueryClientProvider>
       </WagmiConfig>
     </html>
   );

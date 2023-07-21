@@ -1,7 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
-import { updateName, updateBio } from "@/app/users";
+import { useUpdateName, useUpdateBio } from "@/queryhooks";
+// import { updateName, updateBio } from "@/app/users";
+import EditBlock from "./EditBlock";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function Profile() {
   const {
@@ -16,9 +19,28 @@ function Profile() {
     updateProfile,
     signData,
     isError,
-    isLoading,
-    isSuccess,
   } = useProfile();
+
+  const queryClient = useQueryClient();
+  const { mutate: updateName } = useMutation({
+    mutationFn: (name: string) => updateName(address, name),
+    onSuccess: () => {
+      console.log("butt");
+      queryClient.invalidateQueries(["userProfile", address]);
+    },
+  });
+  const { mutate: updateBio } = useMutation({
+    mutationFn: (bio: string) => updateBio(address, bio),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["userProfile", address]);
+    },
+  });
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+  const [bioValue, setBioValue] = useState("");
+  const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
   useEffect(() => {
     if (user?.name !== nameValue) {
@@ -27,27 +49,15 @@ function Profile() {
     if (user?.bio !== bioValue) {
       setBioValue(user.bio);
     }
-  }, [user]);
-
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [nameValue, setNameValue] = useState("");
-  const [bioValue, setBioValue] = useState("");
-	const modalRef = React.useRef<HTMLDialogElement|null>(null);
+  }, [user, bioValue, nameValue]);
 
   const updateNameHandler = async (e: any) => {
+    updateName(nameValue);
     e.stopPropagation();
-    const updatedProfile = await updateName(address, nameValue);
-    setIsEditingName(false);
-    const name = updatedProfile?.name;
-    setNameValue(name || "");
   };
   const updateBioHandler = async (e: any) => {
+    updateBio(bioValue);
     e.stopPropagation();
-    const updatedProfile = await updateBio(address, bioValue);
-    setIsEditingBio(false);
-    const bio = updatedProfile?.bio;
-    setBioValue(bio || "");
   };
 
   const getNameValue = () => nameValue;
@@ -60,7 +70,24 @@ function Profile() {
               <p className="pl-0 p-2 bg-sky-950 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
               </p>
+              <EditBlock
+                isEditing={isEditingName}
+                setIsEditing={setIsEditingName}
+                value={nameValue}
+                setValue={setNameValue}
+                updateHandler={updateNameHandler}
+                placeHolder="Name"
+              />
 
+              <EditBlock
+                isEditing={isEditingBio}
+                setIsEditing={setIsEditingBio}
+                value={bioValue}
+                setValue={setBioValue}
+                updateHandler={updateBioHandler}
+                placeHolder="Bio"
+              />
+              {/*
               {isEditingName ? (
                 <div className="py-2 m-0">
                   <input
@@ -118,7 +145,7 @@ function Profile() {
                   </span>
                   {bioValue}
                 </p>
-              )}
+              )}*/}
               {/*
               {isEditingName && (
                 <>

@@ -3,3 +3,10 @@ export interface Nft {
 	contractAddress: string;
 	tokenId: string;
 }
+
+export type UserData = {
+	ethAddress: string;
+	name?: string;
+	bio?: string;
+	ensName?: string;
+}

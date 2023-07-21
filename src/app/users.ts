@@ -1,7 +1,21 @@
 "use server";
 
 import prisma from "@/prisma";
+import { UserData } from "@/types/types";
 import { Prisma } from "@prisma/client";
+
+async function prismaUpdate(ethAddress: string, data: Partial<UserData>) {
+  let updatedUser;
+  try {
+    updatedUser = await prisma.user.update({
+      where: { ethAddress },
+      data,
+    });
+  } catch (e: any) {
+    throw new Error(`error updating user, ${e}`);
+  }
+  return updatedUser;
+}
 
 export async function getUser(address: string) {
   // get it from the db
@@ -22,43 +36,16 @@ export async function getUser(address: string) {
   return createUser;
 }
 
+export const updateName = (address: string, name: string) =>
+  prismaUpdate(address, { name });
+
+export const updateBio = (address: string, bio: string) =>
+  prismaUpdate(address, { bio });
+
 export async function updateUserEns(address: string, ensName: string) {
   let updatedUser;
   if (ensName) {
-    try {
-      updatedUser = await prisma.user.update({
-        where: { ethAddress: address },
-        data: { ensName: ensName },
-      });
-    } catch (e: any) {
-      throw new Error("error updating user", e);
-    }
+		updatedUser = prismaUpdate(address, { ensName });
   }
   return updatedUser;
-}
-
-export async function updateName(ethAddress: string, name: string) {
-  let updatedUser;
-  try {
-    updatedUser = await prisma.user.update({
-      where: { ethAddress },
-      data: { name },
-    });
-  } catch (e: any) {
-    throw new Error("error updating user name", e);
-  }
-	return updatedUser;
-}
-
-export async function updateBio(ethAddress: string, bio: string) {
-  let updatedUser;
-  try {
-    updatedUser = await prisma.user.update({
-      where: { ethAddress },
-      data: { bio },
-    });
-  } catch (e: any) {
-    throw new Error("error updating user bio", e);
-  }
-	return updatedUser;
 }

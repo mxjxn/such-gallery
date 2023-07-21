@@ -8,7 +8,7 @@ import {
 import {
   parseEtherscanUrl,
   parseManifoldUrl,
-  parseOpenseaNftUrl,
+  parseOpenSeaUrl,
   parseZoraUrl,
 } from "@/lib/parseNftUrl";
 import { Nft } from "@/types/types";
@@ -21,7 +21,7 @@ interface IUrlParser {
 const urlParsers: IUrlParser[] = [
   {
     validateFunc: validateOpenseaNftUrl,
-    parseFunc: parseOpenseaNftUrl,
+    parseFunc: parseOpenSeaUrl,
   },
   {
     validateFunc: validateZoraUrl,

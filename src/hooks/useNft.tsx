@@ -3,6 +3,7 @@ import { useContractRead } from "wagmi";
 import nftABI from "@/abis/erc721abi";
 import { Nft } from "@/types/types";
 import useSWR from "swr";
+import handleImageUrl from "@/lib/handleImageUrls";
 
 type TokenInformation = Nft | null;
 
@@ -48,6 +49,7 @@ export function useNft(tokenInfo: TokenInformation) {
     args: [tokenInfo?.tokenId],
   });
 
+
   // get metadata from tokenURI
   const { data: metadata, error: metadataError } = useSWR(
     () => tokenURI,
@@ -59,14 +61,7 @@ export function useNft(tokenInfo: TokenInformation) {
     const str = tokenURIData as string;
     console.log({ tokenURIData, tokenURIError });
     if (!!str && !tokenURIError) {
-      if (str.split(":")[0] === "https") {
-        console.log({ https: str });
-        setTokenURI(tokenURIData as string);
-      } else if (str.split(":")[0] === "ipfs") {
-        const cid: string = str.split(":")[1];
-        setTokenURI(`https://ipfs.io/ipfs/${cid}`);
-      }
-      console.log("setting tokenURI");
+			setTokenURI(handleImageUrl(str))
     }
     if (tokenURIError) {
       console.error("Failed to fetch token URI");

@@ -11,7 +11,7 @@ export default function Home() {
 	}, [user]);
   return (
     <main className="">
-			{ !!user?.ethAddress && <SubmitArt /> }
+			{ user?.ethAddress && <SubmitArt /> }
 			{/* Latest Chronological Submissions */}
 			{/* Curate */}
 			{/* Curated Galleries */}

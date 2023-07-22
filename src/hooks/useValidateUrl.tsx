@@ -46,16 +46,23 @@ export const useValidateNftUrl = () => {
   // Create an array of parsers with their corresponding validation function
   // Continue by adding additional parsers to this array
   useEffect(() => {
+    let foundValidUrl = false;
+
     urlParsers.forEach((parser) => {
-      // Check if URL is valid for a given parser and if so, set isUrlValid and parsed result
       if (parser.validateFunc(url)) {
         setIsUrlValid(true);
         setNft(parser.parseFunc(url));
+        foundValidUrl = true;
         return;
       }
     });
+
+    if (!foundValidUrl) {
+      setIsUrlValid(false);
+      setNft(null);
+    }
     // Make sure to re-check when URL or parsers change
-  }, [url, urlParsers]);
+  }, [url]);
 
   return { url, setUrl, isUrlValid, nft };
 };

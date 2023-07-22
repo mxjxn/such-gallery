@@ -4,44 +4,69 @@ import prisma from "@/prisma";
 import { Prisma } from "@prisma/client";
 
 export async function getNftsByUser(ethAddress: string) {
-	const nfts = await prisma.user.findUnique({
-		where: {
-			ethAddress
-		},
-		include: {
-			nfts: true,
-		}
-	});
-	return nfts;
+  const nfts = await prisma.user.findUnique({
+    where: {
+      ethAddress,
+    },
+    include: {
+      nfts: true,
+    },
+  });
+  return nfts;
 }
 
 export async function addNftToUser(
   ethAddress: string,
-  nftData: Prisma.NFTCreateInput,
+  nftData: Prisma.NFTCreateInput
 ) {
-	// find or create the nft
-	const nft = await prisma.nFT.upsert({
-		where: { contractAddress_tokenId: { contractAddress: nftData.contractAddress, tokenId: nftData.tokenId } },
-		update: {},
-		create: nftData,
-	});
+  // Try to find the NFT first
+  let nft: any;
+  try {
+    nft = await prisma.nFT.findUnique({
+      where: {
+        contractAddress_tokenId: {
+          contractAddress: nftData.contractAddress,
+          tokenId: nftData.tokenId,
+        },
+      },
+    });
+  } catch (e: any) {
+    throw new Error(e);
+  }
+	
+	console.log('findUnique nft result', {nft})
 
-	// find user and update nfts
-	const userWithNft = await prisma.user.update({
-		where: { ethAddress },
-		data: {
-			nfts: {
-				connect: {
-					id: nft.id,
-				},
-			},
-		},
-		include: {
-			nfts: true,
-		}
-	});
+  // If not found - create it
+  if (!nft) {
+    console.log({ nftData });
+    try {
+      nft = await prisma.nFT.create({
+        data: nftData,
+      });
+    } catch (e: any) {
+      throw new Error(e);
+    }
+    console.log("Created NFT", nft);
+  }
 
-	return userWithNft;
+	console.log('create nft result', {nft})
+
+  // find user and update nfts
+  const userWithNft = await prisma.user.update({
+    where: { ethAddress },
+    data: {
+      nfts: {
+        connect: {
+          id: nft.id,
+        },
+      },
+    },
+    include: {
+      nfts: true,
+    },
+  });
+
+  return userWithNft;
 }
 
 /*

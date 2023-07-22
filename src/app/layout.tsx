@@ -1,13 +1,12 @@
 "use client";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { inter } from "@/fonts";
 import { WagmiConfig, createConfig, mainnet } from "wagmi";
 import { createPublicClient, http } from "viem";
 import Header from "@/components/Header";
 import { ProfileProvider } from "@/hooks/ProfileContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const inter = Inter({ subsets: ["latin"] });
 
 const wagmiConfig = createConfig({
   autoConnect: true,

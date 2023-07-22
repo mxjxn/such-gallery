@@ -28,10 +28,8 @@ model NFT {
   imageURI           String
   title              String
   description        String?                @db.Text
-  ownerOf            User                   @relation(fields: [ownerId], references: [id])
-  ownerId            Int
-  ERC721             Boolean
-  ERC1155            Boolean
+  ownerOf            User?                   @relation(fields: [ownerId], references: [id])
+  ownerId            Int?
   curatedCollections CuratedCollectionNFT[]
 
   @@unique([contractAddress, tokenId])

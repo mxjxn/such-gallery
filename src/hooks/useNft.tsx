@@ -17,7 +17,6 @@ async function tokenURIFetcher(url: string) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log("data", data);
     return data;
   } catch (error) {
     console.error(`Fetch error: ${error}`);
@@ -71,6 +70,6 @@ export function useNft(tokenInfo: TokenInformation) {
   return {
     data: { metadata, tokenURI },
     error: tokenURIError,
-    tokenURILoading,
+    loading: tokenURILoading,
   };
 }

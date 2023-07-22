@@ -4,7 +4,8 @@ import prisma from "@/prisma";
 import { Prisma } from "@prisma/client";
 
 export async function getNftsByUser(ethAddress: string) {
-  const nfts = await prisma.user.findUnique({
+	console.log({ ethAddress })
+  const user = await prisma.user.findUnique({
     where: {
       ethAddress,
     },
@@ -12,7 +13,7 @@ export async function getNftsByUser(ethAddress: string) {
       nfts: true,
     },
   });
-  return nfts;
+  return user?.nfts;
 }
 
 export async function addNftToUser(

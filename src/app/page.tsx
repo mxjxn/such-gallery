@@ -15,7 +15,7 @@ export default function Home() {
       {user?.ethAddress && (
         <>
           <SubmitArt />
-					<NftList />
+					<NftList address={user.ethAddress}/>
         </>
       )}
       {/* Latest Chronological Submissions */}

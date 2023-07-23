@@ -35,7 +35,6 @@ export type Metadata = {
 };
 
 export function useNft(tokenInfo: TokenInformation) {
-  // get tokenURI from contract
   const [tokenURI, setTokenURI] = useState<string | null>(null);
   const {
     data: tokenURIData,

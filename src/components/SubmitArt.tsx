@@ -1,87 +1,55 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { comicNeue } from "@/fonts";
-import { useValidateNftUrl } from "@/hooks/useValidateUrl";
 import { Metadata, useNft } from "@/hooks/useNft";
 import handleImageUrl from "@/lib/handleImageUrls";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addNftToUser, getNftsByUser } from "@/app/nfts";
+import { addNftToUser } from "@/app/nfts";
 import { useProfile } from "@/hooks/useProfile";
-import { Prisma } from "@prisma/client";
+import Image from "next/image";
+import { validUrlParser } from "@/lib/validNftUrl";
 
 // this is the page where users can submit an NFT.
 // they can drop a URL that contains contractAddress and tokenId (such as opensea or etherscan)
 // and it will be added to the database.
 
-function Image({ src, alt }) {
-  let imageUrl = handleImageUrl(src);
-  return (
-    <img
-      src={imageUrl}
-      alt={alt}
-      className="xs:w-1/2 sm:w-36 md:w-48 lg:w-72"
-    />
-  );
-}
+// const Img = ({ src, alt }) => <img src={handleImageUrl(src)} alt={alt} className="xs:w-1/2 sm:w-36 md:w-48 lg:w-72" />;
 
 export default function SubmitArt() {
   // when the url is valid, the contractAddress and tokenUri are parsed, the submit button is enabled.
-  const { setUrl, url, isUrlValid, nft } = useValidateNftUrl();
-	const queryClient = useQueryClient()
+	const [url, setUrl] = useState("");
+	const [isUrlValid, nft] = validUrlParser(url)
+  const queryClient = useQueryClient();
 
   // this next hook will fetch the onchain data for the NFT
   const { address } = useProfile();
   const { data, error, loading } = useNft(nft);
-  const [fresh, setFresh] = useState(false);
   const metadata: Metadata = data?.metadata;
-  const { attributes, name, description, image } = metadata || {};
+  const { name } = metadata || {};
 
   const mutation = useMutation({
-    mutationFn: (newNft: any) => {
-      console.log({ newNft });
-      return addNftToUser(address, newNft);
+    mutationFn: (newNft: any) => addNftToUser(address, newNft),
+    onSuccess: (a: any) => {
+      queryClient.invalidateQueries({ queryKey: ["userNfts", address] });
+      setUrl("");
     },
-		onSuccess: (a: any) => {
-			queryClient.invalidateQueries({queryKey: ["userNfts", address]})
-		}
   });
 
-  useEffect(() => {
-    if (!fresh && isUrlValid && !loading) setFresh(true);
-  }, [name, fresh]);
-
-  useEffect(() => {
-    console.log({ nft });
-  }, [nft]);
-
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value !== url) {
-      setFresh(false);
-    }
     setUrl(e.target.value);
-    console.log({
-      isUrlValid,
-      val: e.target.value,
-    });
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const { contractAddress, tokenId } = nft;
     e.preventDefault();
-    e.stopPropagation();
-    console.log({
-      nft,
-      data,
-    });
     mutation.mutate({
       tokenId,
       contractAddress,
       metadataURI: handleImageUrl(data?.tokenURI),
       imageURI: handleImageUrl(data?.metadata?.image),
-			title: data?.metadata?.name,
-			description: data?.metadata?.description,
+      title: data?.metadata?.name,
+      description: data?.metadata?.description,
     });
-    console.log("handleSubmit");
   };
 
   return (
@@ -117,11 +85,16 @@ export default function SubmitArt() {
             </button>
           </div>
 
-          {fresh && (
+          {isUrlValid && metadata && (
             <div className="my-5 pt-5 py-2 px-14 flex flex-col md:flex-row-reverse xs:items-center bg-slate-800 justify-between">
               <div className="rounded-xl w-full flex justify-center p-5">
                 {metadata?.image && (
-                  <Image src={metadata.image} alt={metadata.name} />
+                  <Image
+                    src={handleImageUrl(metadata.image)}
+                    alt={metadata.name}
+                    width={128}
+                    height={128}
+                  />
                 )}
               </div>
               <div className=" mt-5">

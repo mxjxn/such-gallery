@@ -13,10 +13,12 @@ export default function Home() {
   return (
     <main className="">
       {user?.ethAddress && (
-        <>
-          <SubmitArt />
-					<NftList address={user.ethAddress}/>
-        </>
+        <div className="w-full flex justify-around">
+          <div className="w-1/2">
+            <SubmitArt />
+            <NftList address={user.ethAddress} />
+          </div>
+        </div>
       )}
       {/* Latest Chronological Submissions */}
       {/* Curate */}

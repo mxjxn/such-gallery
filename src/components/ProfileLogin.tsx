@@ -27,7 +27,6 @@ function Profile() {
   const { mutate: updateNameMutation } = useMutation({
     mutationFn: (name: string) => updateName(address, name),
     onSuccess: () => {
-      console.log("butt");
       setIsEditingName(false);
       queryClient.invalidateQueries(["userProfile", address]);
     },

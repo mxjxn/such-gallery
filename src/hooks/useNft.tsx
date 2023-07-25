@@ -3,6 +3,7 @@ import { useContractRead } from "wagmi";
 import nftABI from "@/abis/erc721abi";
 import { Nft } from "@/types/types";
 import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import handleImageUrl from "@/lib/handleImageUrls";
 
 type TokenInformation = Nft | null;
@@ -47,19 +48,20 @@ export function useNft(tokenInfo: TokenInformation) {
     args: [tokenInfo?.tokenId],
   });
 
-
   // get metadata from tokenURI
-  const { data: metadata, error: metadataError } = useSWR(
-    () => tokenURI,
-    tokenURIFetcher
+  // const { data: metadata, error: metadataError } = useSWR(() => tokenURI, tokenURIFetcher);
+
+  const { data: metadata, error: metadataError } = useQuery(
+    ["tokenURI", tokenURI],
+    () => tokenURIFetcher(tokenURI)
   );
 
-	// set the TokenURI, based on URI type (ipfs, https)
+  // set the TokenURI, based on URI type (ipfs, https)
   useEffect(() => {
     const str = tokenURIData as string;
     console.log({ tokenURIData, tokenURIError });
     if (!!str && !tokenURIError) {
-			setTokenURI(handleImageUrl(str))
+      setTokenURI(handleImageUrl(str));
     }
     if (tokenURIError) {
       console.error("Failed to fetch token URI");

@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
-import { useUpdateName, useUpdateBio } from "@/queryhooks";
-// import { updateName, updateBio } from "@/app/users";
+// import { useUpdateName, useUpdateBio } from "@/queryhooks";
+import { updateName, updateBio } from "@/app/users";
 import EditBlock from "./EditBlock";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -15,26 +15,7 @@ function Profile() {
     ensName,
     displayName,
     user,
-    signMessage,
-    updateProfile,
-    signData,
-    isError,
   } = useProfile();
-
-  const queryClient = useQueryClient();
-  const { mutate: updateName } = useMutation({
-    mutationFn: (name: string) => updateName(address, name),
-    onSuccess: () => {
-      console.log("butt");
-      queryClient.invalidateQueries(["userProfile", address]);
-    },
-  });
-  const { mutate: updateBio } = useMutation({
-    mutationFn: (bio: string) => updateBio(address, bio),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["userProfile", address]);
-    },
-  });
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -42,22 +23,34 @@ function Profile() {
   const [bioValue, setBioValue] = useState("");
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
+  const queryClient = useQueryClient();
+  const { mutate: updateNameMutation } = useMutation({
+    mutationFn: (name: string) => updateName(address, name),
+    onSuccess: () => {
+      setIsEditingName(false);
+      queryClient.invalidateQueries(["userProfile", address]);
+    },
+  });
+  const { mutate: updateBioMutation } = useMutation({
+    mutationFn: (bio: string) => updateBio(address, bio),
+    onSuccess: () => {
+      setIsEditingBio(false);
+      queryClient.invalidateQueries(["userProfile", address]);
+    },
+  });
+
   useEffect(() => {
-    if (user?.name !== nameValue) {
-      setNameValue(user.name);
-    }
-    if (user?.bio !== bioValue) {
-      setBioValue(user.bio);
-    }
-  }, [user, bioValue, nameValue]);
+    console.log({ user, nameValue, bioValue });
+    setNameValue(user.name);
+    setBioValue(user.bio);
+  }, [user]);
 
   const updateNameHandler = async (e: any) => {
-    updateName(nameValue);
-    e.stopPropagation();
+    console.log("updating the damn thing");
+    updateNameMutation(nameValue);
   };
   const updateBioHandler = async (e: any) => {
-    updateBio(bioValue);
-    e.stopPropagation();
+    updateBioMutation(bioValue);
   };
 
   const getNameValue = () => nameValue;
@@ -70,24 +63,7 @@ function Profile() {
               <p className="pl-0 p-2 bg-sky-950 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
               </p>
-              <EditBlock
-                isEditing={isEditingName}
-                setIsEditing={setIsEditingName}
-                value={nameValue}
-                setValue={setNameValue}
-                updateHandler={updateNameHandler}
-                placeHolder="Name"
-              />
 
-              <EditBlock
-                isEditing={isEditingBio}
-                setIsEditing={setIsEditingBio}
-                value={bioValue}
-                setValue={setBioValue}
-                updateHandler={updateBioHandler}
-                placeHolder="Bio"
-              />
-              {/*
               {isEditingName ? (
                 <div className="py-2 m-0">
                   <input
@@ -109,13 +85,17 @@ function Profile() {
                   </div>
                 </div>
               ) : (
-                <div className="p-2 m-0 flex items-center" onClick={() => setIsEditingName(true)}>
+                <div
+                  className="p-2 m-0 flex items-center"
+                  onClick={() => setIsEditingName(true)}
+                >
                   <span className="text-slate-400 text-sm pr-2 underline block w-14">
                     Name
                   </span>
                   {nameValue}
                 </div>
               )}
+
               {isEditingBio ? (
                 <div className="m-0 py-2">
                   <input
@@ -139,42 +119,17 @@ function Profile() {
                   </div>
                 </div>
               ) : (
-                <p className="p-2 m-0 flex items-center" onClick={() => setIsEditingBio(true)}>
+                <p
+                  className="p-2 m-0 flex items-center"
+                  onClick={() => setIsEditingBio(true)}
+                >
                   <span className="text-slate-400 text-sm pr-2 underline w-14">
                     Bio
                   </span>
                   {bioValue}
                 </p>
-              )}*/}
-              {/*
-              {isEditingName && (
-                <>
-                  <input
-                    type="text"
-                    placeholder={nameValue}
-                    onChange={(e) => {
-                      console.log("set name to ", e.target.value);
-                      setNameValue(e.target.value);
-                    }}
-                    className="input input-bordered w-full max-w-xs"
-                  />
-                </>
               )}
-              {!isEditingBio && <p className="m-2">Bio: {user?.bio}</p>}
-              {isEditingBio && (
-                <>
-                  <input
-                    type="text"
-                    placeholder={bioValue}
-                    onChange={(e) => {
-                      console.log("set name to ", e.target.value);
-                      setNameValue(e.target.value);
-                    }}
-                    className="input input-bordered w-full max-w-xs"
-                  />
-                </>
-              )}
-*/}
+
               <p className="text-center mt-5">
                 <button
                   className="p-3 bg-gradient-to-b from-rose-800 to-rose-950 border-rose-700 tracking-wider rounded-xl"
@@ -183,6 +138,7 @@ function Profile() {
                   Disconnect
                 </button>
               </p>
+
             </form>
             <form method="dialog" className="modal-backdrop">
               <button>close</button>

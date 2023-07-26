@@ -3,6 +3,8 @@ import { useContractRead } from "wagmi";
 import nftABI from "@/abis/erc721abi";
 import { Nft } from "@/types/types";
 import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
+import handleImageUrl from "@/lib/handleImageUrls";
 
 type TokenInformation = Nft | null;
 
@@ -16,7 +18,6 @@ async function tokenURIFetcher(url: string) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log("data", data);
     return data;
   } catch (error) {
     console.error(`Fetch error: ${error}`);
@@ -35,7 +36,6 @@ export type Metadata = {
 };
 
 export function useNft(tokenInfo: TokenInformation) {
-  // get tokenURI from contract
   const [tokenURI, setTokenURI] = useState<string | null>(null);
   const {
     data: tokenURIData,
@@ -49,24 +49,19 @@ export function useNft(tokenInfo: TokenInformation) {
   });
 
   // get metadata from tokenURI
-  const { data: metadata, error: metadataError } = useSWR(
-    () => tokenURI,
-    tokenURIFetcher
+  // const { data: metadata, error: metadataError } = useSWR(() => tokenURI, tokenURIFetcher);
+
+  const { data: metadata, error: metadataError } = useQuery(
+    ["tokenURI", tokenURI],
+    () => tokenURIFetcher(tokenURI)
   );
 
-	// set the TokenURI, based on URI type (ipfs, https)
+  // set the TokenURI, based on URI type (ipfs, https)
   useEffect(() => {
     const str = tokenURIData as string;
     console.log({ tokenURIData, tokenURIError });
     if (!!str && !tokenURIError) {
-      if (str.split(":")[0] === "https") {
-        console.log({ https: str });
-        setTokenURI(tokenURIData as string);
-      } else if (str.split(":")[0] === "ipfs") {
-        const cid: string = str.split(":")[1];
-        setTokenURI(`https://ipfs.io/ipfs/${cid}`);
-      }
-      console.log("setting tokenURI");
+      setTokenURI(handleImageUrl(str));
     }
     if (tokenURIError) {
       console.error("Failed to fetch token URI");
@@ -76,6 +71,6 @@ export function useNft(tokenInfo: TokenInformation) {
   return {
     data: { metadata, tokenURI },
     error: tokenURIError,
-    tokenURILoading,
+    loading: tokenURILoading,
   };
 }

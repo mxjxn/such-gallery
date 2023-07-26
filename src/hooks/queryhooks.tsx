@@ -8,5 +8,3 @@ export const useProfileQuery = (address: string) => {
   });
   return data;
 };
-
-

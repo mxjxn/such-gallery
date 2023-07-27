@@ -4,5 +4,7 @@ export default function handleImageUrl(url) {
 		return url
   } else if (url.split(":")[0] === "ipfs") {
 		return "https://ipfs.io/ipfs/" + url.slice(7);
+	} else if (url[0] === "Q") {
+		return "https://ipfs.io/ipfs/" + url
 	}
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useContractRead } from "wagmi";
 import nftABI from "@/abis/erc721abi";
-import { Nft } from "@/types/types";
+import { Nft, Metadata } from "@/types/types";
 import useSWR from "swr";
 import { useQuery } from "@tanstack/react-query";
 import handleImageUrl from "@/lib/handleImageUrls";
@@ -25,16 +25,6 @@ async function tokenURIFetcher(url: string) {
   }
 }
 
-export type Metadata = {
-  name?: string;
-  description?: string;
-  image?: string;
-  image_details?: any;
-  image_url?: string;
-  created_by?: string;
-  attributes?: Array<any>;
-};
-
 export function useNft(tokenInfo: TokenInformation) {
   const [tokenURI, setTokenURI] = useState<string | null>(null);
   const {
@@ -47,9 +37,6 @@ export function useNft(tokenInfo: TokenInformation) {
     functionName: "tokenURI",
     args: [tokenInfo?.tokenId],
   });
-
-  // get metadata from tokenURI
-  // const { data: metadata, error: metadataError } = useSWR(() => tokenURI, tokenURIFetcher);
 
   const { data: metadata, error: metadataError } = useQuery(
     ["tokenURI", tokenURI],

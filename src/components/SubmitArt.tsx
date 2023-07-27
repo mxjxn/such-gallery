@@ -9,12 +9,7 @@ import { addNftToUser } from "@/app/nfts";
 import { useProfile } from "@/hooks/useProfile";
 import Image from "next/image";
 import { validUrlParser } from "@/lib/validNftUrl";
-
-// this is the page where users can submit an NFT.
-// they can drop a URL that contains contractAddress and tokenId (such as opensea or etherscan)
-// and it will be added to the database.
-
-// const Img = ({ src, alt }) => <img src={handleImageUrl(src)} alt={alt} className="xs:w-1/2 sm:w-36 md:w-48 lg:w-72" />;
+import { NftPreviewCard } from "./NftCards";
 
 export default function SubmitArt() {
   // when the url is valid, the contractAddress and tokenUri are parsed, the submit button is enabled.
@@ -90,47 +85,7 @@ export default function SubmitArt() {
           </div>
 
           {isUrlValid && metadata && (
-            <div className="my-5 pt-5 py-2 px-14 flex flex-col md:flex-row-reverse xs:items-center bg-slate-800 justify-between">
-              <div className="rounded-xl w-full flex justify-center p-5">
-                {metadata?.image && (
-                  <Image
-                    src={handleImageUrl(metadata.image)}
-                    alt={metadata.name}
-                    width={128}
-                    height={128}
-                  />
-                )}
-              </div>
-              <div className=" mt-5">
-                {name && (
-                  <div className="p-2 m-2 bg-zinc-800">Name: {name}</div>
-                )}
-                {/*
-                {description && (
-                  <div className="p-2 m-2 bg-zinc-800">
-                    Description: {description}
-                  </div>
-                )}
-                {attributes && (
-                  <div className="m-2 py-2 bg-zinc-800">
-                    {attributes.map((attribute, i) => (
-                      <div key={i} className="p-2 ">
-                        {attribute.trait_type}: {attribute.value}
-                      </div>
-                    ))}
-                  </div>
-                )}
-								*/}
-                {nft && (
-                  <div className="text-xs p-3 m-2 bg-zinc-900  overflow-hidden">
-                    contract/id:
-                    <span className="ml-2 bg-zinc-800">
-                      {nft.contractAddress}/{nft.tokenId}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+						<NftPreviewCard data={{ ...metadata, ...nft }} />
           )}
         </form>
       </div>

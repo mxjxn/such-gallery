@@ -1,39 +1,87 @@
-import {
-  parseEtherscanUrl,
-  parseManifoldUrl,
-  parseOpenSeaUrl,
-  parseZoraUrl,
-} from "@/lib/parseNftUrl";
 import { Nft } from "@/types/types";
 
 interface IUrlParser {
   validateFunc: (url: string) => boolean;
-  parseFunc: (url: string) => Nft;
+  parseFunc: (url: string) => Nft | null;
 }
 
+// artblocks regex
+const artBlocksRegex =
+  /^https?:\/\/(www\.)?artblocks\.io\/.*\/(0x[a-fA-F0-9]{40})\/\d+\/tokens\/(\d+)$/g;
+// artblocks Validator
+export function validateArtBlocksUrl(url: string): boolean {
+  artBlocksRegex.lastIndex = 0;
+  return artBlocksRegex.test(url);
+}
+// artblocks Parser
+export function parseArtBlocksUrl(url: string): Nft | null {
+  const result = artBlocksRegex.exec(url);
+  return result
+    ? { chain: "eth", contractAddress: result[2], tokenId: result[3] }
+    : null;
+}
+
+// opensea regex
+const openseaRegex =
+  /^https:\/\/opensea\.io\/assets\/(\w+)\/([a-zA-Z0-9]+)\/(\d+)$/g;
+// opensea Validator
 export function validateOpenseaNftUrl(url: string): boolean {
-    const pattern = new RegExp('(http|https):\/\/(.*?)\/(ethereum|polygon|optimism)\/(.*?)\/(.*?)', 'g');
-    return pattern.test(url);
+  openseaRegex.lastIndex = 0;
+  return openseaRegex.test(url);
+}
+// opensea Parser
+export function parseOpenSeaUrl(url: string): Nft | null {
+  const result = openseaRegex.exec(url);
+  return result
+    ? { chain: result[1], contractAddress: result[2], tokenId: result[3] }
+    : null;
 }
 
+// zora regex
+const zoraRegex =
+  /^https:\/\/zora\.co\/(\w+)\/eth:(0x[a-fA-F0-9]{40})\/(\d+)$/g;
+// zora Validator
 export function validateZoraUrl(url: string): boolean {
-  const regex = /^https:\/\/zora\.co\/(\w+)\/eth:(0x[a-fA-F0-9]{40})\/(\d+)$/g;
-  return regex.test(url);
+  zoraRegex.lastIndex = 0;
+  return zoraRegex.test(url);
+}
+// zora Parser
+export function parseZoraUrl(url: string): Nft | null {
+  const result = zoraRegex.exec(url);
+  return result
+    ? { chain: "eth", contractAddress: result[2], tokenId: result[3] }
+    : null;
 }
 
-export function validateOpenSeaUrl(url: string): boolean {
-  const regex = /^https:\/\/opensea\.io\/assets\/(\w+)\/([a-zA-Z0-9]+)\/(\d+)$/g;
-  return regex.test(url);
+const etherscanRegex =
+  /^https:\/\/etherscan\.io\/nft\/(0x[a-zA-Z0-9]{40})\/(\d+)$/g;
+export function parseEtherscanUrl(url: string): Nft | null {
+  const result = etherscanRegex.exec(url);
+  return result
+    ? { chain: "eth", contractAddress: result[1], tokenId: result[2] }
+    : null;
 }
-
 export function validateEtherscanUrl(url: string): boolean {
-  const regex = /^https:\/\/etherscan\.io\/nft\/(0x[a-zA-Z0-9]{40})\/(\d+)$/g;
-  return regex.test(url);
+  etherscanRegex.lastIndex = 0;
+  return etherscanRegex.test(url);
 }
 
+const manifoldRegex =
+  /^https:\/\/gallery\.manifold\.xyz\/((\w+\/)?)(([a-zA-Z0-9]{40})\/(\d+))$/g;
+export function parseManifoldUrl(url: string): Nft | null {
+  const result = manifoldRegex.exec(url);
+  if (result) {
+    let chain = "eth";
+    if (result[2]) {
+      chain = result[2].slice(0, -1);
+    }
+    return { chain, contractAddress: result[4], tokenId: result[5] };
+  }
+  return null;
+}
 export function validateManifoldUrl(url: string): boolean {
-  const regex = /^https:\/\/gallery\.manifold\.xyz\/((\w+\/)?)((0x[a-fA-F0-9]{40})\/\d+)$/g;
-  return regex.test(url);
+  manifoldRegex.lastIndex = 0;
+  return manifoldRegex.test(url);
 }
 
 const urlParsers: IUrlParser[] = [
@@ -55,14 +103,14 @@ const urlParsers: IUrlParser[] = [
   },
 ];
 
-export function validUrlParser (url: string) {
-	let valid = false;
-	let parsedUrl = null;
-	urlParsers.forEach( parser => {
-		if (parser.validateFunc(url)) {
-			valid = true;
-			parsedUrl = parser.parseFunc(url)
-		}
-	});
-	return [valid, parsedUrl];
+export function validUrlParser(url: string) {
+  let valid = false;
+  let parsedUrl = null;
+  urlParsers.forEach((parser) => {
+    if (parser.validateFunc(url)) {
+      valid = true;
+      parsedUrl = parser.parseFunc(url);
+    }
+  });
+  return [valid, parsedUrl];
 }

@@ -4,7 +4,6 @@ import prisma from "@/prisma";
 import { Prisma } from "@prisma/client";
 
 export async function getNftsByUser(ethAddress: string) {
-	console.log({ ethAddress })
   const user = await prisma.user.findUnique({
     where: {
       ethAddress,
@@ -35,11 +34,9 @@ export async function addNftToUser(
     throw new Error(e);
   }
 	
-	console.log('findUnique nft result', {nft})
 
   // If not found - create it
   if (!nft) {
-    console.log({ nftData });
     try {
       nft = await prisma.nFT.create({
         data: nftData,
@@ -47,10 +44,8 @@ export async function addNftToUser(
     } catch (e: any) {
       throw new Error(e);
     }
-    console.log("Created NFT", nft);
   }
 
-	console.log('create nft result', {nft})
 
   // find user and update nfts
   const userWithNft = await prisma.user.update({

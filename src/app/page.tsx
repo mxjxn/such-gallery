@@ -8,9 +8,6 @@ import NftList from "@/components/NftList";
 
 export default function Home() {
   const { user } = useProfile();
-  useEffect(() => {
-    console.log("main page!", { user });
-  }, [user]);
   const { isDisconnected } = useAccount();
   return (
     <main className="">

@@ -10,7 +10,6 @@ type TokenInformation = Nft | null;
 
 async function tokenURIFetcher(url: string) {
   if (!url) return null;
-  console.log("fetching metadata", url);
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -46,7 +45,6 @@ export function useNft(tokenInfo: TokenInformation) {
   // set the TokenURI, based on URI type (ipfs, https)
   useEffect(() => {
     const str = tokenURIData as string;
-    console.log({ tokenURIData, tokenURIError });
     if (!!str && !tokenURIError) {
       setTokenURI(handleImageUrl(str));
     }

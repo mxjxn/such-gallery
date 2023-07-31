@@ -40,13 +40,11 @@ function Profile() {
   });
 
   useEffect(() => {
-    console.log({ user, nameValue, bioValue });
     setNameValue(user.name);
     setBioValue(user.bio);
   }, [user]);
 
   const updateNameHandler = async (e: any) => {
-    console.log("updating the damn thing");
     updateNameMutation(nameValue);
   };
   const updateBioHandler = async (e: any) => {

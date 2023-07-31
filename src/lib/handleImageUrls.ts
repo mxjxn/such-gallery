@@ -1,5 +1,4 @@
-export default function handleImageUrl(url) {
-	console.log(url)
+export default function handleImageUrl(url: string) {
   if (url.split(":")[0] === "https" || url.split(":")[0] === "http") {
 		return url
   } else if (url.split(":")[0] === "ipfs") {

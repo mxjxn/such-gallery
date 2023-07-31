@@ -34,7 +34,6 @@ function NftImage({
   );
 }
 
-
 export function NftPreviewCard({ data }) {
   const { image, name, contractAddress, tokenId } = data;
   const imageUrl = handleImageUrl(image);
@@ -46,9 +45,7 @@ export function NftPreviewCard({ data }) {
       <div className="mt-2">
         {name && (
           <div className="text-xs p-1 mb-2 bg-zinc-900  overflow-hidden">
-            <span className="pl-1 py-1 bg-zinc-800 block">
-							{name}
-						</span>
+            <span className="pl-1 py-1 bg-zinc-800 block">{name}</span>
           </div>
         )}
         {!!contractAddress && (
@@ -91,9 +88,8 @@ const NftCard = ({
             <XCircleIcon
               className="text-red-500 w-4 h-4"
               onClick={() => {
-                console.log({ title, imageURI });
                 onDelete().then((x) => {
-                  console.log(x);
+                  console.log("deleted ", x);
                 });
               }}
             />
@@ -127,14 +123,11 @@ const NftListItem = ({
       <XCircleIcon
         className="text-red-500 hover:text-red-400 active:text-red-300 w-6 h-6"
         onClick={() => {
-          console.log({ title, imageURI });
-          onDelete().then((x) => {
-            console.log(x);
-          });
+          onDelete();
         }}
       />
     )}
   </div>
 );
 
-export { NftListItem, NftCard }
+export { NftListItem, NftCard };

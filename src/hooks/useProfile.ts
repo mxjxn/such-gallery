@@ -56,7 +56,6 @@ export function useProfile(): UseProfileReturn {
       // Fetch the user from the database
       const fetchUser = async () => {
         let userFromServer = await getUser(address);
-        console.log({ userFromServer });
         // Update the user state
         setUser(userFromServer);
       };
@@ -66,7 +65,6 @@ export function useProfile(): UseProfileReturn {
       const updateUser = async () => {
         let updatedUser = await updateUserEns(address, ensData);
         setUser(updatedUser);
-        console.log({ updatedUser });
       };
       updateUser();
     }
@@ -74,7 +72,6 @@ export function useProfile(): UseProfileReturn {
 
 	//	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
   //useEffect(() => {
-  //console.log({ensData});
   //}, [ensData]);
 
   return {

@@ -32,9 +32,7 @@ export default function NftList({ address }: { address: string }) {
     },
   });
   const [cardView, setCardView] = React.useState(false);
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
+
   return (
     <div>
       {!_.isEmpty(data) && (

@@ -7,7 +7,7 @@ interface IUrlParser {
 
 // artblocks regex
 const artBlocksRegex =
-  /^https?:\/\/(www\.)?artblocks\.io\/.*\/(0x[a-fA-F0-9]{40})\/\d+\/tokens\/(\d+)$/g;
+  /^https?:\/\/(www\.)?artblocks\.io\/.*\/(0x[a-fA-F0-9]{40})\/\d+\/tokens\/(\d+)$/;
 // artblocks Validator
 export function validateArtBlocksUrl(url: string): boolean {
   artBlocksRegex.lastIndex = 0;
@@ -23,7 +23,7 @@ export function parseArtBlocksUrl(url: string): Nft | null {
 
 // opensea regex
 const openseaRegex =
-  /^https:\/\/opensea\.io\/assets\/(\w+)\/([a-zA-Z0-9]+)\/(\d+)$/g;
+  /^https:\/\/opensea\.io\/assets\/(\w+)\/([a-zA-Z0-9]+)\/(\d+)$/;
 // opensea Validator
 export function validateOpenseaNftUrl(url: string): boolean {
   openseaRegex.lastIndex = 0;
@@ -39,7 +39,7 @@ export function parseOpenSeaUrl(url: string): Nft | null {
 
 // zora regex
 const zoraRegex =
-  /^https:\/\/zora\.co\/(\w+)\/eth:(0x[a-fA-F0-9]{40})\/(\d+)$/g;
+  /^https:\/\/zora\.co\/(\w+)\/eth:(0x[a-fA-F0-9]{40})\/(\d+)$/;
 // zora Validator
 export function validateZoraUrl(url: string): boolean {
   zoraRegex.lastIndex = 0;
@@ -54,7 +54,7 @@ export function parseZoraUrl(url: string): Nft | null {
 }
 
 const etherscanRegex =
-  /^https:\/\/etherscan\.io\/nft\/(0x[a-zA-Z0-9]{40})\/(\d+)$/g;
+  /^https:\/\/etherscan\.io\/nft\/(0x[a-zA-Z0-9]{40})\/(\d+)$/;
 export function parseEtherscanUrl(url: string): Nft | null {
   const result = etherscanRegex.exec(url);
   return result
@@ -67,7 +67,7 @@ export function validateEtherscanUrl(url: string): boolean {
 }
 
 const manifoldRegex =
-  /^https:\/\/gallery\.manifold\.xyz\/((\w+\/)?)(([a-zA-Z0-9]{40})\/(\d+))$/g;
+  /^https:\/\/gallery\.manifold\.xyz\/((\w+\/)?)(([a-zA-Z0-9]{40})\/(\d+))$/;
 export function parseManifoldUrl(url: string): Nft | null {
   const result = manifoldRegex.exec(url);
   if (result) {
@@ -107,9 +107,12 @@ export function validUrlParser(url: string) {
   let valid = false;
   let parsedUrl = null;
   urlParsers.forEach((parser) => {
+		console.log({ valid:parser.validateFunc(url), parsed: parser.parseFunc(url) })
+		console.log()
     if (parser.validateFunc(url)) {
       valid = true;
       parsedUrl = parser.parseFunc(url);
+			console.log(parsedUrl)
     }
   });
   return [valid, parsedUrl];

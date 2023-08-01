@@ -107,12 +107,9 @@ export function validUrlParser(url: string) {
   let valid = false;
   let parsedUrl = null;
   urlParsers.forEach((parser) => {
-		console.log({ valid:parser.validateFunc(url), parsed: parser.parseFunc(url) })
-		console.log()
     if (parser.validateFunc(url)) {
       valid = true;
       parsedUrl = parser.parseFunc(url);
-			console.log(parsedUrl)
     }
   });
   return [valid, parsedUrl];

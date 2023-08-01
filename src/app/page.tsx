@@ -1,16 +1,14 @@
 "use client";
 import Image from "next/image";
-import SubmitArt from "../components/SubmitArt";
 import { useProfile } from "@/hooks/useProfile";
 import { useAccount } from "wagmi";
 import { useEffect } from "react";
-import NftList from "@/components/NftList";
+import SubmitArt from "@/components/SubmitArt";
+import UserNftList from "@/components/UserNftList";
+import UserCuratedLists from "@/components/UserCuratedLists";
 
 export default function Home() {
   const { user } = useProfile();
-  useEffect(() => {
-    console.log("main page!", { user });
-  }, [user]);
   const { isDisconnected } = useAccount();
   return (
     <main className="">
@@ -18,12 +16,13 @@ export default function Home() {
         <div className="w-full flex justify-around">
           <div className="w-1/2">
             <SubmitArt />
-            <NftList address={user.ethAddress} />
+            <UserNftList address={user.ethAddress} />
+						<UserCuratedLists />
           </div>
         </div>
       )}
+
       {/* Latest Chronological Submissions */}
-      {/* Curate */}
       {/* Curated Galleries */}
       {/* Events */}
     </main>

@@ -9,6 +9,7 @@ import {
 } from "@/app/nfts";
 import Image from "next/image";
 import { NftCard, NftListItem } from "./NftCards";
+import { addNftToCuratedList } from "@/app/curated";
 
 export default function UserNftList({ address }: { address: string }) {
   const queryClient = useQueryClient();
@@ -31,7 +32,16 @@ export default function UserNftList({ address }: { address: string }) {
       queryClient.invalidateQueries({ queryKey: ["userNfts", address] });
     },
   });
+  const { mutate: addNftToList } = useMutation({
+    mutationFn: ({ nftId, listId }: { nftId: number; listId: number }) => {
+      return addNftToCuratedList(nftId, listId);
+    },
+		onSuccess: (a: any) => {
+			queryClient.invalidateQueries({ queryKey: ["userCuratedLists", address] });
+		}
+  });
   const [cardView, setCardView] = React.useState(false);
+  const [activeItem, setActiveItem] = React.useState(-1);
   return (
     <div>
       {!_.isEmpty(data) && (
@@ -60,13 +70,26 @@ export default function UserNftList({ address }: { address: string }) {
             {!cardView ? (
               <div className="w-full flex flex-col justify-evenly flex-wrap gap-1 items-stretch p-2">
                 {!!data &&
-                  data.map((nft) => (
+                  data.map((nft, i) => (
                     <NftListItem
                       key={`${nft?.title}_${Math.floor(
                         Math.random() * Math.pow(2, 11)
                       )}`}
+											nft={nft}
                       imageURI={nft?.imageURI || ""}
                       title={nft?.title || "Missing title"}
+                      onClose={() => {
+                        setActiveItem(-1);
+                      }}
+                      onSelect={() => {
+                        if (activeItem !== i) {
+                          setActiveItem(i);
+                        }
+                      }}
+                      isOpen={i === activeItem}
+                      onAddToList={(listId) => {
+												addNftToList({ nftId: nft.id, listId });
+                      }}
                       onDelete={async () =>
                         deleteNft({
                           ethAddress: address,

@@ -1,7 +1,19 @@
 import Image from "next/image";
-import React from "react";
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import React, { useEffect, useState } from "react";
+import {
+  XCircleIcon,
+  FolderPlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 import handleImageUrl from "@/lib/handleImageUrls";
+import _ from "lodash";
+import {
+  addNftToCuratedList,
+  getUserCuratedLists,
+  getUserCuratedListsByAddress,
+} from "@/app/curated";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useProfile } from "@/hooks/useProfile";
 
 const { random, floor, pow } = Math;
 const imageSizes = { xs: 30, sm: 60, md: 120, lg: 240, xl: 480, "2xl": 960 };
@@ -13,7 +25,7 @@ const scaledSize = (w: number, h: number, scale: number) => {
   return [scaledW, scaledH];
 };
 
-function NftImage({
+export function NftImage({
   src,
   alt,
   size,
@@ -100,34 +112,132 @@ const NftCard = ({
   </div>
 );
 
+const AddToList = ({ nftId }: { nftId: number }) => {
+  // react query to get user's lists
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user, address } = useProfile();
+  const { data, isLoading } = useQuery(
+    ["userCuratedLists", address],
+    async () => getUserCuratedLists(user.id)
+  );
+  const { mutate: addToList } = useMutation({
+    mutationFn: (listId: number) => {
+      return addNftToCuratedList(nftId, listId);
+    },
+    onSuccess: (e: any) => {
+      queryClient.invalidateQueries(["userCuratedLists", address]);
+    },
+  });
+
+  useEffect(() => {
+    console.log({ data });
+  }, [data]);
+
+  return (
+    <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
+      <details
+        className="dropdown dropdown-end"
+				open={open}
+        onClick={() => {
+          !open && setOpen(!open);
+        }}
+      >
+        <summary className="m-1 btn" onClick={(e)=>e.preventDefault()}>
+          <FolderPlusIcon className="w-6 h-6 inline-block pr-1" />
+          <div className="inline-block text-xs">add to list</div>
+        </summary>
+        <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nftId}-to-${list.id}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+										setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </details>
+    </div>
+  );
+};
+
 const NftListItem = ({
   title,
   imageURI,
+  nft,
   key,
   onDelete,
+  onClose,
+  isOpen,
+  onSelect,
+  onAddToList,
 }: {
   title: string;
   imageURI: string;
+  nft: any;
   key?: string;
   onDelete: () => Promise<void> | null;
-}) => (
-  <div
-    key={key}
-    className="px-2 flex flex-row bg-gradient-to-r justify-between items-center from-slate-600 to-slate-700 p-1 gap-0 hover:from-slate-500 hover:to-slate-600 transition-colors"
-  >
-    <div>
-      <NftImage src={imageURI} alt={title} size="xs" />
+  onClose: () => void;
+  isOpen: boolean;
+  onSelect: () => void;
+  onAddToList: (id: number) => void;
+}) => {
+  return (
+    <div
+      key={key}
+      className={`relative px-2 flex flex-row gap-4 bg-gradient-to-r from-slate-800 to-slate-700 p-1 transition-all
+				${
+          isOpen
+            ? "flex-wrap items-start pt-3"
+            : "hover:from-slate-500 hover:to-slate-600 items-center"
+        }
+			`}
+      onClick={onSelect}
+    >
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-300 hover:text-gray-50 active:text-gray-800"
+        >
+          <XMarkIcon className="w-6 h-6 inline-block pr-1" />
+        </div>
+      )}
+      <div className={isOpen ? "p-3 bg-black" : "bg-black p-1"}>
+        <NftImage src={imageURI} alt={title} size={isOpen ? "md" : "xs"} />
+      </div>
+      <div
+        className={`
+					flex
+					${isOpen ? "flex-col justify-start" : "justify-between"}
+				`}
+      >
+        <div className="flex items-center justify-between">
+          <div className={isOpen ? `` : ""}>{title}</div>
+        </div>
+
+        {isOpen && !!onDelete && (
+          <div className="flex justify-start items-center">
+            <AddToList nftId={nft.id} onSelect={onAddToList} />
+            <div className="text-red-500 hover:text-red-400 active:text-red-300 pr-2 m-2">
+              <XCircleIcon
+                className=" w-6 h-6 inline-block pr-1"
+                onClick={() => {
+                  onDelete();
+                }}
+              />
+              <div className="inline-block text-xs">remove from saved</div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-    <div>{title}</div>
-    {!!onDelete && (
-      <XCircleIcon
-        className="text-red-500 hover:text-red-400 active:text-red-300 w-6 h-6"
-        onClick={() => {
-          onDelete();
-        }}
-      />
-    )}
-  </div>
-);
+  );
+};
 
 export { NftListItem, NftCard };

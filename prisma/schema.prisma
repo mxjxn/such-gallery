@@ -41,7 +41,7 @@ model CuratedCollection {
   curatorId   Int
 	title       String?
 	description String?
-  NFTs        CuratedCollectionNFT[]
+  nfts        CuratedCollectionNFT[]
 }
 
 model CuratedCollectionNFT {

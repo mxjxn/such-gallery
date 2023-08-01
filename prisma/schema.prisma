@@ -36,15 +36,18 @@ model NFT {
 }
 
 model CuratedCollection {
-  id        Int                    @id @default(autoincrement())
-  curator   User                   @relation(fields: [curatorId], references: [id])
-  curatorId Int
-  NFTs      CuratedCollectionNFT[]
+  id          Int                    @id @default(autoincrement())
+  curator     User                   @relation(fields: [curatorId], references: [id])
+  curatorId   Int
+	title       String?
+	description String?
+  NFTs        CuratedCollectionNFT[]
 }
 
 model CuratedCollectionNFT {
   curatedCollection   CuratedCollection @relation(fields: [curatedCollectionId], references: [id])
   curatedCollectionId Int
+	curatorComment      String?
   nft                 NFT               @relation(fields: [nftId], references: [id])
   nftId               Int
 

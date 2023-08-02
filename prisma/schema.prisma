@@ -42,6 +42,7 @@ model CuratedCollection {
 	title       String?
 	description String?
   nfts        CuratedCollectionNFT[]
+	// slug        string (kebab-case)
 }
 
 model CuratedCollectionNFT {

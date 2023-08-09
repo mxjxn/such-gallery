@@ -26,9 +26,9 @@ export default function NftActions({
   // save to curated list
   // create curated list and add to it
   return (
-    <div className="flex flex-row justify-end gap-8 mt-4">
+    <div className="flex flex-row items-center justify-end gap-8 mt-4 mx-4">
       <button
-        className="btn btn-lg"
+        className="btn btn-md"
         onClick={() => {
           saveNft();
           onSave();
@@ -36,7 +36,6 @@ export default function NftActions({
       >
         Save
       </button>
-      <button className="btn btn-lg">Curate</button>
 			<CurateWithoutSaving nft={nft} />
 			
     </div>

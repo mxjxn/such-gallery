@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import _ from "lodash";
 import {
-    addNewNftToCuratedList,
+  addNewNftToCuratedList,
   addNftToCuratedList,
   getUserCuratedLists,
 } from "@/app/curated";
@@ -111,11 +111,10 @@ const NftCard = ({
 );
 
 export const CurateWithoutSaving = ({
-	nft,
-}:{
-	nft: Prisma.NFTCreateInput;
+  nft,
+}: {
+  nft: Prisma.NFTCreateInput;
 }) => {
-	
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user, address } = useProfile();
@@ -134,18 +133,63 @@ export const CurateWithoutSaving = ({
 
   return (
     <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
-      <details
+      <div
+        className="dropdown dropdown-end"
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <label
+          tabIndex={0}
+          className="btn m-1"
+          onClick={(e) => e.preventDefault()}
+        >
+          Add to list
+        </label>
+        <ul
+          tabIndex={0}
+          className={`dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 ${open ? "block" : "hidden"}`}
+        >
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+                    setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </div>
+
+      
+    </div>
+  );
+};
+/*
+ <details
         className="dropdown dropdown-end"
         open={open}
         onClick={() => {
-          !open && setOpen(!open);
+          setOpen(!open);
         }}
       >
-        <summary className="m-1 btn" onClick={(e) => e.preventDefault()}>
+        <summary
+          tabIndex={0}
+          className="m-1 btn"
+          onClick={(e) => e.preventDefault()}
+        >
           <FolderPlusIcon className="w-6 h-6 inline-block pr-1" />
           <div className="inline-block text-xs">add to list</div>
         </summary>
-        <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
+        <ul
+          tabIndex={0}
+          className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52"
+        >
           {!_.isEmpty(data) &&
             _.map(data, (list) => (
               <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
@@ -161,9 +205,7 @@ export const CurateWithoutSaving = ({
             ))}
         </ul>
       </details>
-    </div>
-  );
-}
+ * */
 
 const AddToList = ({ nftId }: { nftId: number }) => {
   // react query to get user's lists

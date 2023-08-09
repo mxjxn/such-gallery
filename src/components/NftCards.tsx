@@ -1,23 +1,21 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   XCircleIcon,
   FolderPlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import handleImageUrl from "@/lib/handleImageUrls";
 import _ from "lodash";
 import {
+  addNewNftToCuratedList,
   addNftToCuratedList,
   getUserCuratedLists,
-  getUserCuratedListsByAddress,
 } from "@/app/curated";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
-import { TokenResponseItem } from "@zoralabs/zdk";
+import { Prisma } from "@prisma/client";
 
-const { random, floor, pow } = Math;
 const imageSizes = { xs: 30, sm: 60, md: 120, lg: 240, xl: 480, "2xl": 960 };
 
 const scaledSize = (w: number, h: number, scale: number) => {
@@ -112,6 +110,103 @@ const NftCard = ({
   </div>
 );
 
+export const CurateWithoutSaving = ({
+  nft,
+}: {
+  nft: Prisma.NFTCreateInput;
+}) => {
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user, address } = useProfile();
+  const { data, isLoading } = useQuery(
+    ["userCuratedLists", address],
+    async () => getUserCuratedLists(user.id)
+  );
+  const { mutate: addToList } = useMutation({
+    mutationFn: (listId: number) => {
+      return addNewNftToCuratedList(nft, listId);
+    },
+    onSuccess: (e: any) => {
+      queryClient.invalidateQueries(["userCuratedLists", address]);
+    },
+  });
+
+  return (
+    <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
+      <div
+        className="dropdown dropdown-end"
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <label
+          tabIndex={0}
+          className="btn m-1"
+          onClick={(e) => e.preventDefault()}
+        >
+          Add to list
+        </label>
+        <ul
+          tabIndex={0}
+          className={`dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 ${open ? "block" : "hidden"}`}
+        >
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+                    setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </div>
+
+      
+    </div>
+  );
+};
+/*
+ <details
+        className="dropdown dropdown-end"
+        open={open}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <summary
+          tabIndex={0}
+          className="m-1 btn"
+          onClick={(e) => e.preventDefault()}
+        >
+          <FolderPlusIcon className="w-6 h-6 inline-block pr-1" />
+          <div className="inline-block text-xs">add to list</div>
+        </summary>
+        <ul
+          tabIndex={0}
+          className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52"
+        >
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+                    setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </details>
+ * */
+
 const AddToList = ({ nftId }: { nftId: number }) => {
   // react query to get user's lists
   const [open, setOpen] = useState(false);
@@ -129,10 +224,6 @@ const AddToList = ({ nftId }: { nftId: number }) => {
       queryClient.invalidateQueries(["userCuratedLists", address]);
     },
   });
-
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
 
   return (
     <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
@@ -240,4 +331,4 @@ const NftListItem = ({
   );
 };
 
-export { NftListItem, NftCard };
+export { NftListItem, NftCard, AddToList };

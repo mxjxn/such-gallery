@@ -3,6 +3,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Prisma } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
+import { AddToList, CurateWithoutSaving  } from "./NftCards";
 
 export default function NftActions({
   nft,
@@ -14,13 +15,9 @@ export default function NftActions({
   const queryClient = useQueryClient();
   const { address } = useProfile();
 
-
   // add to user nft list
-  const mutation = useMutation({
-    mutationFn: (newNft: any) => { 
-			console.log( '🐄 ☘️ 🐮', newNft, "💂‍♀️", address);
-			addNftToUser(address, newNft)
-		},
+  const { mutate: saveNft } = useMutation({
+    mutationFn: () => addNftToUser(address, nft),
     onSuccess: (a: any) => {
       console.log("success adding Nft to User", a);
       queryClient.invalidateQueries({ queryKey: ["userNfts", address] });
@@ -29,17 +26,18 @@ export default function NftActions({
   // save to curated list
   // create curated list and add to it
   return (
-    <div className="flex flex-row justify-end gap-8 mt-4">
+    <div className="flex flex-row items-center justify-end gap-8 mt-4 mx-4">
       <button
-        className="btn btn-lg"
+        className="btn btn-md"
         onClick={() => {
-          mutation.mutate(nft);
+          saveNft();
           onSave();
         }}
       >
         Save
       </button>
-      <button className="btn btn-lg">Curate</button>
+			<CurateWithoutSaving nft={nft} />
+			
     </div>
   );
 }

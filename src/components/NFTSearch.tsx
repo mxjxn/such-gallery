@@ -76,33 +76,35 @@ export default function NFTSearch() {
                   height={256}
                 />
               </div>
-              <div className="mt-3 xl:mt-0 xl:mr-3">
-                <LabeledField inline label={"Name"}>
-                  <div className="text-lg">{nft.token.token.name}</div>
-                </LabeledField>
-                <LabeledField inline label={"Creator"}>
-                  {nft.token.token.metadata.created_by}
-                </LabeledField>
-                <LabeledField inline label={"Contract"} className="p-0 m-0">
-                  <CopyTextComponent
-                    text={nft.token.token.collectionAddress}
-                    className="py-1"
+              <div className="flex flex-col">
+                <div className="mt-3 xl:mt-0 xl:mr-3">
+                  <LabeledField inline label={"Name"}>
+                    <div className="text-lg">{nft.token.token.name}</div>
+                  </LabeledField>
+                  <LabeledField inline label={"Creator"}>
+                    {nft.token.token.metadata.created_by}
+                  </LabeledField>
+                  <LabeledField inline label={"Contract"} className="p-0 m-0">
+                    <CopyTextComponent
+                      text={nft.token.token.collectionAddress}
+                      className="py-1"
+                    />
+                  </LabeledField>
+                  <LabeledField inline label={"Token ID"}>
+                    {nft.token.token.tokenId}
+                  </LabeledField>
+                </div>
+                <div className={`w-full`}>
+                  <NftActions
+                    nft={zoraToSuchNft(nft.token)}
+                    onSave={() => {
+                      if (!_.isNull(inputRef.current))
+                        inputRef.current.value = "";
+                      setInputValue("");
+                    }}
                   />
-                </LabeledField>
-                <LabeledField inline label={"Token ID"}>
-                  {nft.token.token.tokenId}
-                </LabeledField>
+                </div>
               </div>
-            </div>
-            <div className={`w-full`}>
-              <NftActions
-                nft={zoraToSuchNft(nft.token)}
-                onSave={() => {
-                  if(!_.isNull(inputRef.current))
-										inputRef.current.value = "";
-										setInputValue("");
-                }}
-              />
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 export interface Nft {
-	chain: string;
 	contractAddress: string;
 	tokenId: string;
+	chain?: string | number;
 }
 
 export type UserData = {

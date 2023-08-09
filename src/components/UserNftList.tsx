@@ -68,7 +68,7 @@ export default function UserNftList({ address }: { address: string }) {
           </div>
           <div className=" rounded-2xl border-4 border-slate-800 mb-4">
             {!cardView ? (
-              <div className="w-full flex flex-col justify-evenly flex-wrap gap-1 items-stretch p-2">
+              <div className="w-full flex flex-col justify-stretch flex-wrap gap-1 items-stretch p-2">
                 {!!data &&
                   data.map((nft, i) => (
                     <NftListItem
@@ -101,7 +101,7 @@ export default function UserNftList({ address }: { address: string }) {
                   ))}
               </div>
             ) : (
-              <div className="w-full flex flex-row justify-between flex-wrap items-stretch">
+              <div className="w-full flex flex-row justify-around flex-wrap items-stretch">
                 {!!data &&
                   data.map((nft) => (
                     <NftCard

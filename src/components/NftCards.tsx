@@ -1,21 +1,21 @@
+"use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   XCircleIcon,
   FolderPlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import handleImageUrl from "@/lib/handleImageUrls";
 import _ from "lodash";
 import {
+  addNewNftToCuratedList,
   addNftToCuratedList,
   getUserCuratedLists,
-  getUserCuratedListsByAddress,
 } from "@/app/curated";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
+import { Prisma } from "@prisma/client";
 
-const { random, floor, pow } = Math;
 const imageSizes = { xs: 30, sm: 60, md: 120, lg: 240, xl: 480, "2xl": 960 };
 
 const scaledSize = (w: number, h: number, scale: number) => {
@@ -46,28 +46,10 @@ export function NftImage({
   );
 }
 
-export function NftPreviewCard({ data }) {
-  const { image, name, contractAddress, tokenId } = data;
-  const imageUrl = handleImageUrl(image);
+export async function NftPreviewLoading() {
   return (
     <div className="my-5 pt-5 py-2 px-2 flex flex-col xl:flex-row-reverse xs:items-center bg-slate-800 justify-between rounded-lg">
-      <div className="p-2 w-full bg-black block-inline flex justify-around rounded-md">
-        {image && <Image src={imageUrl} alt={name} width={256} height={256} />}
-      </div>
-      <div className="mt-2">
-        {name && (
-          <div className="text-xs p-1 mb-2 bg-zinc-900  overflow-hidden">
-            <span className="pl-1 py-1 bg-zinc-800 block">{name}</span>
-          </div>
-        )}
-        {!!contractAddress && (
-          <div className="text-xs p-1 mt-2 bg-zinc-900  overflow-hidden">
-            <span className="pl-1 py-1 bg-zinc-800 block">
-              {contractAddress}/{tokenId}
-            </span>
-          </div>
-        )}
-      </div>
+      <div className="loading loading-ball loading-lg" />
     </div>
   );
 }
@@ -85,7 +67,23 @@ const NftCard = ({
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   onDelete: () => Promise<void> | null;
 }) => (
-  <div className="max-w-xs m-2 bg-gradient-to-br from-stone-800 to-gray-800 rounded-lg flex justify-around py-2 border-4 border-slate-700 hover:from-stone-700 hover:to-gray-700">
+  <div
+    className={`
+			w-48
+			m-2
+			bg-gradient-to-br
+			from-stone-800
+			to-gray-800
+			rounded-lg
+			flex
+			justify-around
+			py-2
+			border-4
+			border-slate-700
+			hover:from-stone-700
+			hover:to-gray-700
+		`}
+  >
     {title && imageURI && (
       <div
         className="flex flex-col items-center justify-around flex-wrap text-xs"
@@ -112,6 +110,103 @@ const NftCard = ({
   </div>
 );
 
+export const CurateWithoutSaving = ({
+  nft,
+}: {
+  nft: Prisma.NFTCreateInput;
+}) => {
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user, address } = useProfile();
+  const { data, isLoading } = useQuery(
+    ["userCuratedLists", address],
+    async () => getUserCuratedLists(user.id)
+  );
+  const { mutate: addToList } = useMutation({
+    mutationFn: (listId: number) => {
+      return addNewNftToCuratedList(nft, listId);
+    },
+    onSuccess: (e: any) => {
+      queryClient.invalidateQueries(["userCuratedLists", address]);
+    },
+  });
+
+  return (
+    <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
+      <div
+        className="dropdown dropdown-end"
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <label
+          tabIndex={0}
+          className="btn m-1"
+          onClick={(e) => e.preventDefault()}
+        >
+          Add to list
+        </label>
+        <ul
+          tabIndex={0}
+          className={`dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 ${open ? "block" : "hidden"}`}
+        >
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+                    setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </div>
+
+      
+    </div>
+  );
+};
+/*
+ <details
+        className="dropdown dropdown-end"
+        open={open}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <summary
+          tabIndex={0}
+          className="m-1 btn"
+          onClick={(e) => e.preventDefault()}
+        >
+          <FolderPlusIcon className="w-6 h-6 inline-block pr-1" />
+          <div className="inline-block text-xs">add to list</div>
+        </summary>
+        <ul
+          tabIndex={0}
+          className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52"
+        >
+          {!_.isEmpty(data) &&
+            _.map(data, (list) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+                <a
+                  onClick={() => {
+                    addToList(list.id);
+                    setOpen(false);
+                  }}
+                >
+                  {list.title}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </details>
+ * */
+
 const AddToList = ({ nftId }: { nftId: number }) => {
   // react query to get user's lists
   const [open, setOpen] = useState(false);
@@ -130,20 +225,16 @@ const AddToList = ({ nftId }: { nftId: number }) => {
     },
   });
 
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
-
   return (
     <div className="text-secondary hover:text-secondary-focus active:text-secondary-content">
       <details
         className="dropdown dropdown-end"
-				open={open}
+        open={open}
         onClick={() => {
           !open && setOpen(!open);
         }}
       >
-        <summary className="m-1 btn" onClick={(e)=>e.preventDefault()}>
+        <summary className="m-1 btn" onClick={(e) => e.preventDefault()}>
           <FolderPlusIcon className="w-6 h-6 inline-block pr-1" />
           <div className="inline-block text-xs">add to list</div>
         </summary>
@@ -154,7 +245,7 @@ const AddToList = ({ nftId }: { nftId: number }) => {
                 <a
                   onClick={() => {
                     addToList(list.id);
-										setOpen(false);
+                    setOpen(false);
                   }}
                 >
                   {list.title}
@@ -240,4 +331,4 @@ const NftListItem = ({
   );
 };
 
-export { NftListItem, NftCard };
+export { NftListItem, NftCard, AddToList };

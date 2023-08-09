@@ -16,15 +16,12 @@ async function getNft(nft: Nft): Promise<any> {
 }
 
 export function useNft(nft: Nft) {
-	const { contractAddress, tokenId, chain = "1" } = nft;
-
-  const enabled = !!contractAddress && !!tokenId;
-
+  const { contractAddress = "", tokenId = "", chain = "1" } = nft || {};
   const { data, isLoading, isError } = useQuery(
     ["nft", [chain, contractAddress, tokenId]],
     () => getNft(nft),
     {
-      enabled,
+      enabled: !!contractAddress && !!tokenId,
       onError: (error) => {
         console.log("error dude", error);
       },
@@ -33,10 +30,9 @@ export function useNft(nft: Nft) {
       },
     }
   );
-
   return {
     data,
-		isEnabled: enabled,
+    isEnabled: !!contractAddress && !!tokenId,
     isError,
     isLoading,
   };

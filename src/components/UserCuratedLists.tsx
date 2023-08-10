@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createCuratedList,
@@ -35,9 +35,6 @@ export default function UserCuratedLists() {
       });
     },
   });
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
   return (
     <div className="mb-4">
       <div className="flex justify-between">

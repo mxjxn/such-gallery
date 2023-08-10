@@ -40,9 +40,9 @@ model CuratedCollection {
   curator     User                   @relation(fields: [curatorId], references: [id])
   curatorId   Int
 	title       String?
+  slug        String?                @unique
 	description String?
   nfts        CuratedCollectionNFT[]
-	// slug        string (kebab-case)
 }
 
 model CuratedCollectionNFT {
@@ -51,6 +51,5 @@ model CuratedCollectionNFT {
 	curatorComment      String?
   nft                 NFT               @relation(fields: [nftId], references: [id])
   nftId               Int
-
   @@id([curatedCollectionId, nftId])
 }

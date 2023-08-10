@@ -19,7 +19,6 @@ export default function NftActions({
   const { mutate: saveNft } = useMutation({
     mutationFn: () => addNftToUser(address, nft),
     onSuccess: (a: any) => {
-      console.log("success adding Nft to User", a);
       queryClient.invalidateQueries({ queryKey: ["userNfts", address] });
     },
   });

@@ -115,7 +115,9 @@ export async function getUserCuratedListsByAddress(
     where: {
       curatorId: user.id,
     },
-    include: {
+    select: {
+			title: true,
+			slug: true,
       nfts: {
         include: {
           nft: true,

@@ -97,11 +97,7 @@ const NftCard = ({
           {!!onDelete && (
             <XCircleIcon
               className="text-red-500 w-4 h-4"
-              onClick={() => {
-                onDelete().then((x) => {
-                  console.log("deleted ", x);
-                });
-              }}
+              onClick={() => onDelete()}
             />
           )}
         </div>
@@ -148,7 +144,9 @@ export const CurateWithoutSaving = ({
         </label>
         <ul
           tabIndex={0}
-          className={`dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 ${open ? "block" : "hidden"}`}
+          className={`dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 ${
+            open ? "block" : "hidden"
+          }`}
         >
           {!_.isEmpty(data) &&
             _.map(data, (list) => (
@@ -165,8 +163,6 @@ export const CurateWithoutSaving = ({
             ))}
         </ul>
       </div>
-
-      
     </div>
   );
 };

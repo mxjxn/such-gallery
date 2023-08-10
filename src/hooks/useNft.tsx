@@ -1,9 +1,9 @@
-import { endpoint, networks } from "@/utils/zora"
+import { endpoint, networks } from "@/utils/zora";
 import { Nft } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { ZDK } from "@zoralabs/zdk";
 
-async function getNft(nft: Nft): Promise<any> {
+async function getNft(nft: Nft, includeFullDetails: boolean): Promise<any> {
   const zdk = new ZDK({ networks, endpoint });
   return await zdk.sdk.token({
     network: networks[0],
@@ -11,7 +11,7 @@ async function getNft(nft: Nft): Promise<any> {
       address: nft.contractAddress,
       tokenId: nft.tokenId,
     },
-    includeFullDetails: true,
+    includeFullDetails,
   });
 }
 
@@ -19,14 +19,13 @@ export function useNft(nft: Nft) {
   const { contractAddress = "", tokenId = "", chain = "1" } = nft || {};
   const { data, isLoading, isError } = useQuery(
     ["nft", [chain, contractAddress, tokenId]],
-    () => getNft(nft),
+    () => getNft(nft, true),
     {
       enabled: !!contractAddress && !!tokenId,
       onError: (error) => {
-        console.log("error dude", error);
+        console.error("error at zora getToken call", error);
       },
       onSuccess: (data) => {
-        console.log("cool dude", data);
       },
     }
   );

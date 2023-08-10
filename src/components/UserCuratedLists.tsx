@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createCuratedList,
@@ -10,6 +10,7 @@ import _ from "lodash";
 import { useProfile } from "@/hooks/useProfile";
 import EditableText from "./EditableText";
 import { NftImage } from "./NftCards";
+import Link from "next/link";
 
 export default function UserCuratedLists() {
   const queryClient = useQueryClient();
@@ -35,9 +36,6 @@ export default function UserCuratedLists() {
       });
     },
   });
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
   return (
     <div className="mb-4">
       <div className="flex justify-between">
@@ -63,19 +61,37 @@ export default function UserCuratedLists() {
                     updateListName({ id: list.id, title: updatedTitle })
                   }
                 />
-                <div className="flex">
-                  {_.map(list.nfts, (nft, i) => {
-                    return (
-                      <div key={`${list.title}_${i}`}>
-                        <NftImage
-                          src={_.get(nft, "nft.imageURI")}
-													alt={_.get(nft, "nft.title")}
-													size="sm"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
+                {list.slug ? (
+                  <Link href={`/so/${list.slug}`}>
+                    <div className="flex">
+                      {_.map(list.nfts, (nft, i) => {
+                        return (
+                          <div key={`${list.title}_${i}`}>
+                            <NftImage
+                              src={_.get(nft, "nft.imageURI")}
+                              alt={_.get(nft, "nft.title")}
+                              size="sm"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex">
+                    {_.map(list.nfts, (nft, i) => {
+                      return (
+                        <div key={`${list.title}_${i}`}>
+                          <NftImage
+                            src={_.get(nft, "nft.imageURI")}
+                            alt={_.get(nft, "nft.title")}
+                            size="sm"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })

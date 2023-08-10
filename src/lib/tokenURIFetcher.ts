@@ -4,7 +4,6 @@ async function tokenURIFetcher(url: string) {
   const imageUrl = handleImageUrl(url);
   if (!imageUrl) return null;
   try {
-    console.log("fetching", imageUrl);
     const response = await fetch(imageUrl);
     if (!response.ok) {
       // throw an exception if the request was not successful

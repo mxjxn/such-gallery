@@ -139,3 +139,28 @@ export async function updateCuratedListTitle(
   });
   return curatedCollection;
 }
+
+export async function getListBySlug(slug: string) {
+  return await prisma.curatedCollection.findUnique({
+    where: {
+      slug,
+    },
+    select: {
+      title: true,
+      curator: {
+        select: {
+          name: true,
+          ensName: true,
+          ethAddress: true,
+          id: true,
+          bio: true,
+        },
+      },
+      nfts: {
+        include: {
+          nft: true,
+        },
+      },
+    },
+  });
+}

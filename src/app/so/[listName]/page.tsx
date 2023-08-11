@@ -1,34 +1,7 @@
+import { getListBySlug } from "@/app/curated";
 import { comicNeue } from "@/fonts";
-import prisma from "@/prisma";
-import { Prisma } from "@prisma/client";
 import _ from "lodash";
 import Image from "next/image";
-
-async function getList(slug: string) {
-  "use server";
-  return await prisma.curatedCollection.findUnique({
-    where: {
-      slug,
-    },
-    select: {
-      title: true,
-      curator: {
-        select: {
-          name: true,
-          ensName: true,
-          ethAddress: true,
-          id: true,
-          bio: true,
-        },
-      },
-      nfts: {
-        include: {
-          nft: true,
-        },
-      },
-    },
-  });
-}
 
 function Description({ description }: { description: string }) {
   const lines: string[] = description.split("\n");
@@ -47,13 +20,19 @@ export default async function Page({
   params: { listName: string };
 }) {
   // take listName, do a prisma lookup
-  const data = await getList(params.listName);
+  const data = await getListBySlug(params.listName);
   const list: any = _.map(data?.nfts, (nft) => nft.nft);
   const curator = data?.curator;
 
   return (
     <div className="p-8">
       <div className="w-full flex flex-col items-center">
+        <div className="xs:w-full sm:w-4/5 md:w-3/4 lg:w-3/5 px-12 ">
+          <div className="w-full flex flex-row-reverse items-center justify-between">
+            <div className="badge badge-info">enable editing</div>
+          </div>
+        </div>
+
         <div className="xs:w-full sm:w-4/5 md:w-3/4 lg:w-3/5 transition-all">
           <div className="mb-24">
             <div className={`text-5xl mb-5 ${comicNeue.className}`}>
@@ -81,13 +60,17 @@ export default async function Page({
                     alt={nft.title}
                   />
                 </div>
-                <p className={`
+                <p
+                  className={`
 								text-3xl 
 								mx-5
 								font-bold
 								tracking-wide
 								${comicNeue.className}
-								`}>{nft.title}</p>
+								`}
+                >
+                  {nft.title}
+                </p>
                 <Description description={nft.description} />
               </div>
             );

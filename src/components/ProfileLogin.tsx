@@ -3,10 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
 // import { useUpdateName, useUpdateBio } from "@/queryhooks";
 import { updateName, updateBio } from "@/app/users";
-import EditBlock from "./EditBlock";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function Profile() {
+function ProfileLogin() {
   const {
     connect,
     disconnect,
@@ -15,6 +14,7 @@ function Profile() {
     ensName,
     displayName,
     user,
+    signMessage,
   } = useProfile();
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -40,6 +40,12 @@ function Profile() {
   });
 
   useEffect(() => {
+    if (!address) {
+      connect();
+    }
+  }, [connect, address]);
+
+  useEffect(() => {
     setNameValue(user.name);
     setBioValue(user.bio);
   }, [user]);
@@ -56,9 +62,13 @@ function Profile() {
     <div className="p-4 flex items-center flex-row-reverse bg-transparent">
       {isConnected ? (
         <div>
-          <dialog id="my_modal_2" className="modal" ref={modalRef}>
-            <form method="dialog" className="modal-box">
-              <p className="pl-0 p-2 bg-sky-950 rounded-xl tracking-widest text-center">
+          <dialog
+						id="my_modal_2"
+						className="modal "
+						ref={modalRef}
+					>
+            <form method="dialog" className="modal-box border-8 border-sky-800">
+              <p className="pl-0 p-2 mb-2 bg-green-100 text-green-800 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
               </p>
 
@@ -127,7 +137,16 @@ function Profile() {
                   {bioValue}
                 </p>
               )}
-
+              <p className="text-center mt-5">
+                <button
+                  className="btn"
+                  onClick={() => {
+                    signMessage();
+                  }}
+                >
+                  Sign
+                </button>
+              </p>
               <p className="text-center mt-5">
                 <button
                   className="p-3 bg-gradient-to-b from-rose-800 to-rose-950 border-rose-700 tracking-wider rounded-xl"
@@ -136,18 +155,18 @@ function Profile() {
                   Disconnect
                 </button>
               </p>
-
             </form>
             <form method="dialog" className="modal-backdrop">
               <button>close</button>
             </form>
           </dialog>
-          <div
-            className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-md p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950"
+          <button
+            className="uppercase text-sm text-neutral-200 hover:text-neutral-50 p-2 inline-block m-1"
             onClick={() => modalRef.current!.showModal()}
           >
-            Connected to {ensName?.data ?? displayName}
-          </div>
+            <div className="text-xs">view/edit profile</div>
+          </button>
+          <div className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-full p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950 m-1">{ensName?.data ?? displayName}</div>
         </div>
       ) : (
         <button
@@ -161,4 +180,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default ProfileLogin;

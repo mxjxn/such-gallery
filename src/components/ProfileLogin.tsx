@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
+import { useAccountModal } from "@rainbow-me/rainbowkit";
 // import { useUpdateName, useUpdateBio } from "@/queryhooks";
 import { updateName, updateBio } from "@/app/users";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,21 +18,22 @@ function ProfileLogin() {
     signMessage,
   } = useProfile();
 
-	const [hasAutoLoggedIn, setHasAutoLoggedIn] = useState(false);
+  const [hasAutoLoggedIn, setHasAutoLoggedIn] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [nameValue, setNameValue] = useState("");
   const [bioValue, setBioValue] = useState("");
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
-	// auto login (only once)
+  const { openAccountModal } = useAccountModal();
+
+  // auto login (only once)
   useEffect(() => {
     if (!hasAutoLoggedIn && !address) {
       connect();
-			setHasAutoLoggedIn(true);
+      setHasAutoLoggedIn(true);
     }
   }, [connect, address, hasAutoLoggedIn]);
-
 
   const queryClient = useQueryClient();
   const { mutate: updateNameMutation } = useMutation({
@@ -66,11 +68,7 @@ function ProfileLogin() {
     <div className="p-4 flex items-center flex-row-reverse bg-transparent">
       {isConnected ? (
         <div>
-          <dialog
-						id="my_modal_2"
-						className="modal "
-						ref={modalRef}
-					>
+          <dialog id="my_modal_2" className="modal " ref={modalRef}>
             <form method="dialog" className="modal-box border-8 border-sky-800">
               <p className="pl-0 p-2 mb-2 bg-green-100 text-green-800 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
@@ -170,7 +168,12 @@ function ProfileLogin() {
           >
             <div className="text-xs">view/edit profile</div>
           </button>
-          <div className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-full p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950 m-1">{ensName?.data ?? displayName}</div>
+          <button
+            onClick={openAccountModal}
+            className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-full p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950 m-1"
+          >
+            {ensName?.data ?? displayName}
+          </button>
         </div>
       ) : (
         <button

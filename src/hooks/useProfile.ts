@@ -12,17 +12,18 @@ import { InjectedConnector } from "wagmi/connectors/injected";
 
 import prisma from "@/prisma";
 import { getUser, updateUserEns } from "@/app/users";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 interface UseProfileReturn {
-  connect: () => Promise<void>;
+  connect: () => void;
   disconnect: () => void;
   isConnected: boolean;
-	address: string;
+  address: string;
   ensName: any; // replace with actual type
   displayName: string | null;
   user: any;
   signMessage: any; // replace with actual type
-	updateProfile: Promise<any>;
+  updateProfile: Promise<any>;
   signData: any; // replace with actual type
   isError: boolean;
   isLoading: boolean;
@@ -31,9 +32,7 @@ interface UseProfileReturn {
 
 export function useProfile(): UseProfileReturn {
   // wallet state hooks
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
+  const { openConnectModal: connect } = useConnectModal();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
   const [user, setUser] = useState<any>({});
@@ -70,21 +69,21 @@ export function useProfile(): UseProfileReturn {
     }
   }, [isConnected, address, ensData, userAddress, userEnsName]);
 
-	//	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
+  //	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
   //useEffect(() => {
   //}, [ensData]);
 
   return {
-    connect,
+		connect,
     disconnect,
     isConnected,
-		address: userAddress,
+    address: userAddress,
     ensName,
     displayName: address
       ? `${address.slice(0, 6)}...${address.slice(-4)}`
       : null,
     user,
-		updateProfile: (address: string, name: string, bio: string) => {},
+    updateProfile: (address: string, name: string, bio: string) => {},
     signMessage,
     signData,
     isError,

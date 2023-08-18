@@ -17,11 +17,21 @@ function ProfileLogin() {
     signMessage,
   } = useProfile();
 
+	const [hasAutoLoggedIn, setHasAutoLoggedIn] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [nameValue, setNameValue] = useState("");
   const [bioValue, setBioValue] = useState("");
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
+
+	// auto login (only once)
+  useEffect(() => {
+    if (!hasAutoLoggedIn && !address) {
+      connect();
+			setHasAutoLoggedIn(true);
+    }
+  }, [connect, address, hasAutoLoggedIn]);
+
 
   const queryClient = useQueryClient();
   const { mutate: updateNameMutation } = useMutation({
@@ -38,12 +48,6 @@ function ProfileLogin() {
       queryClient.invalidateQueries(["userProfile", address]);
     },
   });
-
-  useEffect(() => {
-    if (!address) {
-      connect();
-    }
-  }, [connect, address]);
 
   useEffect(() => {
     setNameValue(user.name);

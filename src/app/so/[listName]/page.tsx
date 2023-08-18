@@ -3,6 +3,8 @@ import prisma from "@/prisma";
 import { Prisma } from "@prisma/client";
 import _ from "lodash";
 import Image from "next/image";
+import Description from "./Description";
+import CuratorComment from "./CuratorComment";
 
 async function getList(slug: string) {
   "use server";
@@ -22,23 +24,24 @@ async function getList(slug: string) {
         },
       },
       nfts: {
-        include: {
-          nft: true,
-        },
+        select: {
+					nft: {
+						select: {
+							title: true,
+							description: true,
+							contractAddress: true,
+							tokenId: true,
+							metadataURI: true,
+							imageURI: true,
+							id: true
+						}
+					},
+					curatorComment: true,
+					nftId: true
+				},
       },
     },
   });
-}
-
-function Description({ description }: { description: string }) {
-  const lines: string[] = description.split("\n");
-  return (
-    <div className="flex flex-col justify-around text-xs mx-5">
-      {_.map(lines, (line) => (
-        <div className="mt-3">{line}</div>
-      ))}
-    </div>
-  );
 }
 
 export default async function Page({
@@ -48,8 +51,14 @@ export default async function Page({
 }) {
   // take listName, do a prisma lookup
   const data = await getList(params.listName);
-  const list: any = _.map(data?.nfts, (nft) => nft.nft);
+  const list: any = _.map(data?.nfts, (nft) => ({
+		curatorComment: nft.curatorComment || "",
+		curationId: nft.id,
+		...nft.nft,
+	}));
   const curator = data?.curator;
+
+  console.log(data);
 
   return (
     <div className="p-8">
@@ -81,13 +90,21 @@ export default async function Page({
                     alt={nft.title}
                   />
                 </div>
-                <p className={`
+                <p
+                  className={`
 								text-3xl 
 								mx-5
 								font-bold
 								tracking-wide
 								${comicNeue.className}
-								`}>{nft.title}</p>
+								`}
+                >
+                  {nft.title}
+                </p>
+								<CuratorComment
+									comment={nft.curatorComment}
+									curationId={nft.curationId}
+								/>
                 <Description description={nft.description} />
               </div>
             );

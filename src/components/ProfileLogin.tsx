@@ -58,7 +58,7 @@ function ProfileLogin() {
 
   const getNameValue = () => nameValue;
   return (
-    <div className="p-4 flex items-center flex-row-reverse bg-transparent">
+    <div className="p-1 flex items-center flex-row-reverse">
       {isConnected ? (
         <div>
           <dialog id="my_modal_2" className="modal " ref={modalRef}>

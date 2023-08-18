@@ -5,6 +5,7 @@ import { useAccountModal } from "@rainbow-me/rainbowkit";
 // import { useUpdateName, useUpdateBio } from "@/queryhooks";
 import { updateName, updateBio } from "@/app/users";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useConnect } from "wagmi";
 
 function ProfileLogin() {
   const {
@@ -18,7 +19,6 @@ function ProfileLogin() {
     signMessage,
   } = useProfile();
 
-  const [hasAutoLoggedIn, setHasAutoLoggedIn] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [nameValue, setNameValue] = useState("");
@@ -26,14 +26,7 @@ function ProfileLogin() {
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
   const { openAccountModal } = useAccountModal();
-
-  // auto login (only once)
-  useEffect(() => {
-    if (!hasAutoLoggedIn && !address) {
-      connect();
-      setHasAutoLoggedIn(true);
-    }
-  }, [connect, address, hasAutoLoggedIn]);
+	
 
   const queryClient = useQueryClient();
   const { mutate: updateNameMutation } = useMutation({

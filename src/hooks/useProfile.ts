@@ -32,7 +32,8 @@ interface UseProfileReturn {
 
 export function useProfile(): UseProfileReturn {
   // wallet state hooks
-  const { openConnectModal: connect } = useConnectModal();
+  const { connect } = useConnect();
+  const { openConnectModal } = useConnectModal();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
   const [user, setUser] = useState<any>({});
@@ -49,6 +50,15 @@ export function useProfile(): UseProfileReturn {
   } = useSignMessage({
     message: `Such sign. Very ${address}. Wow!`,
   });
+
+  // auto login (only once)
+  const [hasAutoLoggedIn, setHasAutoLoggedIn] = useState(false);
+  useEffect(() => {
+    if (!hasAutoLoggedIn && !address) {
+      connect();
+      setHasAutoLoggedIn(true);
+    }
+  }, [connect, address, hasAutoLoggedIn]);
 
   useEffect(() => {
     if (!userAddress && isConnected && address) {
@@ -74,7 +84,7 @@ export function useProfile(): UseProfileReturn {
   //}, [ensData]);
 
   return {
-		connect,
+    connect: () => !!openConnectModal && openConnectModal(),
     disconnect,
     isConnected,
     address: userAddress,

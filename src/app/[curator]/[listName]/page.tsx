@@ -6,15 +6,42 @@ import Image from "next/image";
 import Description from "./Description";
 import CuratorComment from "./CuratorComment";
 
-async function getList(slug: string) {
+async function getList(curator: string, slug: string) {
   "use server";
+  // first check if curator string is an ens name
+  const isEnsName: boolean = _.endsWith(curator, ".eth");
+  const isEthAddress: boolean =
+    _.startsWith(curator, "0x") && curator.length === 42;
+  const curatorLookup: Prisma.UserWhereUniqueInput = isEnsName
+    ? { ensName: curator }
+    : isEthAddress
+    ? { ethAddress: curator }
+    : { id: -1 };
+  if (curatorLookup.id === -1) {
+    console.error("user not found");
+    return null;
+  }
+  const curatorData = await prisma.user.findUnique({
+    where: curatorLookup,
+    select: {
+      id: true,
+    },
+  });
+  // if no user found, throw an error
+  if (!curatorData) {
+    throw new Error("user not found");
+  }
+  // otherwise if its a valid eth address
   return await prisma.curatedCollection.findUnique({
     where: {
-      slug,
+      curatorId_slug: {
+        curatorId: curatorData.id,
+				slug: slug,
+      },
     },
     select: {
       title: true,
-			id: true,
+      id: true,
       curator: {
         select: {
           name: true,
@@ -26,20 +53,20 @@ async function getList(slug: string) {
       },
       nfts: {
         select: {
-					nft: {
-						select: {
-							title: true,
-							description: true,
-							contractAddress: true,
-							tokenId: true,
-							metadataURI: true,
-							imageURI: true,
-							id: true
-						}
-					},
-					curatorComment: true,
-					nftId: true
-				},
+          nft: {
+            select: {
+              title: true,
+              description: true,
+              contractAddress: true,
+              tokenId: true,
+              metadataURI: true,
+              imageURI: true,
+              id: true,
+            },
+          },
+          curatorComment: true,
+          nftId: true,
+        },
       },
     },
   });
@@ -48,15 +75,15 @@ async function getList(slug: string) {
 export default async function Page({
   params,
 }: {
-  params: { listName: string };
+  params: { curator: string; listName: string };
 }) {
   // take listName, do a prisma lookup
-  const data = await getList(params.listName);
+  const data = await getList(params.curator, params.listName);
   const list: any = _.map(data?.nfts, (nft) => ({
-		curatorComment: nft.curatorComment || "",
-		curationId: nft.nftId,
-		...nft.nft,
-	}));
+    curatorComment: nft.curatorComment || "",
+    curationId: nft.nftId,
+    ...nft.nft,
+  }));
   const curator = data?.curator;
   return (
     <div className="p-8">
@@ -79,12 +106,12 @@ export default async function Page({
                 className="flex flex-col mt-8 mb-36 -mx-5"
                 key={`nft-${i}-${nft.title}`}
               >
-								<CuratorComment
-									comment={nft.curatorComment}
-									listId={data?.id || -1}
-									nftId={nft.curationId}
-									curatorId={curator?.id}
-								/>
+                <CuratorComment
+                  comment={nft.curatorComment}
+                  listId={data?.id || -1}
+                  nftId={nft.curationId}
+                  curatorId={curator?.id}
+                />
                 <div className="bg-gradient-to-b from-slate-950 to-slate-900 border border-gray-800 rounded-xl p-5 mb-5 h-4/5">
                   <Image
                     src={nft.imageURI}

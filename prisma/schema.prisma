@@ -12,8 +12,8 @@ datasource db {
 model User {
   id                 Int                 @id @default(autoincrement())
   ethAddress         String              @unique
-  ensName            String?
-  farcasterHandle    String?              @unique
+  ensName            String?             @unique
+  farcasterHandle    String?             @unique
   name               String?
   bio                String?
   curatedCollections CuratedCollection[]
@@ -40,15 +40,19 @@ model CuratedCollection {
   curator     User                   @relation(fields: [curatorId], references: [id])
   curatorId   Int
 	title       String?
-  slug        String?                @unique
+  slug        String?                
+	isPublished Boolean                @default(false)
 	description String?
   nfts        CuratedCollectionNFT[]
+	@@unique([curatorId, slug])
 }
 
 model CuratedCollectionNFT {
   curatedCollection   CuratedCollection @relation(fields: [curatedCollectionId], references: [id])
   curatedCollectionId Int
 	curatorComment      String?
+	showDescription     Boolean           @default(false)
+	showAttributes			Boolean           @default(false)
   nft                 NFT               @relation(fields: [nftId], references: [id])
   nftId               Int
   @@id([curatedCollectionId, nftId])

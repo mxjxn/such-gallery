@@ -21,8 +21,6 @@ function ProfileLogin() {
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
-  const [nameValue, setNameValue] = useState("");
-  const [bioValue, setBioValue] = useState("");
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
   const { openAccountModal } = useAccountModal();
@@ -50,7 +48,6 @@ function ProfileLogin() {
     updateBioMutation(s);
   };
 
-  const getNameValue = () => nameValue;
   return (
     <div className="p-1 flex items-center flex-row-reverse">
       {isConnected ? (
@@ -60,20 +57,24 @@ function ProfileLogin() {
               <p className="pl-0 p-2 mb-2 bg-green-100 text-green-800 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
               </p>
-              <div className="m-0 py-2">
-                <EditableText
-                  label="Display Name"
-                  updateHandler={updateNameHandler}
-                  initialValue={user?.name}
-                />
-              </div>
-              <div className="m-0 py-2">
-                <EditableText
-                  label="Short Bio"
-                  updateHandler={updateBioHandler}
-                  initialValue={user?.bio}
-                />
-              </div>
+              {user?.name && (
+                <div className="m-0 py-2">
+                  <EditableText
+                    label="Display Name"
+                    updateHandler={updateNameHandler}
+                    initialValue={user?.name}
+                  />
+                </div>
+              )}
+              {user?.bio && (
+                <div className="m-0 py-2">
+                  <EditableText
+                    label="Short Bio"
+                    updateHandler={updateBioHandler}
+                    initialValue={user?.bio}
+                  />
+                </div>
+              )}
               <p className="text-center mt-5">
                 <button
                   className="btn"

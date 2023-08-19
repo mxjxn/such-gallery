@@ -79,6 +79,12 @@ export default async function Page({
                 className="flex flex-col mt-8 mb-36 -mx-5"
                 key={`nft-${i}-${nft.title}`}
               >
+								<CuratorComment
+									comment={nft.curatorComment}
+									listId={data?.id || -1}
+									nftId={nft.curationId}
+									curatorId={curator?.id}
+								/>
                 <div className="bg-gradient-to-b from-slate-950 to-slate-900 border border-gray-800 rounded-xl p-5 mb-5 h-4/5">
                   <Image
                     src={nft.imageURI}
@@ -99,12 +105,6 @@ export default async function Page({
                 >
                   {nft.title}
                 </p>
-								<CuratorComment
-									comment={nft.curatorComment}
-									listId={data?.id || -1}
-									nftId={nft.curationId}
-									curatorId={curator?.id}
-								/>
                 <Description description={nft.description} />
               </div>
             );

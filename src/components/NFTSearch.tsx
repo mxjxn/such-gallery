@@ -1,5 +1,5 @@
 import { comicNeue } from "@/fonts";
-import React from "react";
+import React, { useEffect } from "react";
 import { validateUrl, parseUrl } from "@/lib/validNftUrl";
 import CopyTextComponent from "@/components/CopyText";
 import LabeledField from "@/components/LabeledField";

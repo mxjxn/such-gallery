@@ -1,17 +1,38 @@
 "use server";
-
 import prisma from "@/prisma";
-import { CuratedCollection, Prisma } from "@prisma/client";
+import {
+  CuratedCollection,
+  CuratedCollectionNFT,
+  Prisma,
+} from "@prisma/client";
 import _ from "lodash";
+
+function convertToKebabCase(str: string): string {
+    // Convert to lowercase and replace unwanted characters and spaces with hyphens
+    let result = str.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    // Remove leading or trailing hyphens
+    result = result.replace(/^-|-$/g, '');
+
+    // Limit to 5 words
+    let words = result.split('-');
+    if (words.length > 5) {
+        result = words.slice(0, 5).join('-');
+    }
+
+    return result;
+}
+
 
 export async function createCuratedList(
   userId: number,
-  title?: string
+  title: string = "untitled"
 ): Promise<CuratedCollection | null> {
   const curatedList = await prisma.curatedCollection.create({
     data: {
       curatorId: userId,
-      title: title || "untitled",
+      title: title,
+			slug: convertToKebabCase(title),
     },
   });
 
@@ -116,8 +137,8 @@ export async function getUserCuratedListsByAddress(
       curatorId: user.id,
     },
     select: {
-			title: true,
-			slug: true,
+      title: true,
+      slug: true,
       nfts: {
         include: {
           nft: true,
@@ -135,7 +156,47 @@ export async function updateCuratedListTitle(
 ): Promise<CuratedCollection> {
   const curatedCollection = await prisma.curatedCollection.update({
     where: { id: id },
-    data: { title: title },
+    data: {
+			title: title,
+			slug: convertToKebabCase(title),
+		},
   });
   return curatedCollection;
+}
+
+export async function updateNftCuratorComment(
+  curation: number,
+  id: number,
+  note: string
+): Promise<CuratedCollectionNFT> {
+  const updatedCuration = await prisma.curatedCollectionNFT.update({
+    where: {
+      curatedCollectionId_nftId: {
+        curatedCollectionId: curation,
+        nftId: id,
+      },
+    },
+    data: { curatorComment: note },
+  });
+	console.log({updatedCuration});
+	return updatedCuration;
+}
+
+export async function updateNftCurationDescription(
+	curation: number,
+	id: number,
+	toggle: boolean
+): Promise<CuratedCollectionNFT> {
+	const updatedCuration = await prisma.curatedCollectionNFT.update({
+    where: {
+      curatedCollectionId_nftId: {
+        curatedCollectionId: curation,
+        nftId: id,
+      },
+    },
+		data: {
+			showDescription: toggle
+		}
+	})
+	return updatedCuration
 }

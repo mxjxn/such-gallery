@@ -5,7 +5,7 @@ import { useAccountModal } from "@rainbow-me/rainbowkit";
 // import { useUpdateName, useUpdateBio } from "@/queryhooks";
 import { updateName, updateBio } from "@/app/users";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useConnect } from "wagmi";
+import EditableText from "@/components/EditableText";
 
 function ProfileLogin() {
   const {
@@ -21,12 +21,9 @@ function ProfileLogin() {
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
-  const [nameValue, setNameValue] = useState("");
-  const [bioValue, setBioValue] = useState("");
   const modalRef = React.useRef<HTMLDialogElement | null>(null);
 
   const { openAccountModal } = useAccountModal();
-	
 
   const queryClient = useQueryClient();
   const { mutate: updateNameMutation } = useMutation({
@@ -44,21 +41,15 @@ function ProfileLogin() {
     },
   });
 
-  useEffect(() => {
-    setNameValue(user.name);
-    setBioValue(user.bio);
-  }, [user]);
-
-  const updateNameHandler = async (e: any) => {
-    updateNameMutation(nameValue);
+  const updateNameHandler = async (s: string) => {
+    updateNameMutation(s);
   };
-  const updateBioHandler = async (e: any) => {
-    updateBioMutation(bioValue);
+  const updateBioHandler = async (s: string) => {
+    updateBioMutation(s);
   };
 
-  const getNameValue = () => nameValue;
   return (
-    <div className="p-4 flex items-center flex-row-reverse bg-transparent">
+    <div className="p-1 flex items-center flex-row-reverse">
       {isConnected ? (
         <div>
           <dialog id="my_modal_2" className="modal " ref={modalRef}>
@@ -66,71 +57,23 @@ function ProfileLogin() {
               <p className="pl-0 p-2 mb-2 bg-green-100 text-green-800 rounded-xl tracking-widest text-center">
                 Connected with {ensName?.data ?? displayName}
               </p>
-
-              {isEditingName ? (
-                <div className="py-2 m-0">
-                  <input
-                    className="input input-bordered w-full max-w-xs text-white bg-slate-900"
-                    placeholder={nameValue}
-                    onChange={(e) => setNameValue(e.target.value)}
+              {user?.name && (
+                <div className="m-0 py-2">
+                  <EditableText
+                    label="Display Name"
+                    updateHandler={updateNameHandler}
+                    initialValue={user?.name}
                   />
-                  <div
-                    className="text-white bg-red-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-red-200 border border-red-500 active:bg-red-400 transition-colors"
-                    onClick={() => setIsEditingName(false)}
-                  >
-                    Cancel
-                  </div>
-                  <div
-                    className="text-white bg-green-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-green-100 border border-green-500 transition-colors active:bg-green-400"
-                    onClick={updateNameHandler}
-                  >
-                    Save
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="p-2 m-0 flex items-center"
-                  onClick={() => setIsEditingName(true)}
-                >
-                  <span className="text-slate-400 text-sm pr-2 underline block w-14">
-                    Name
-                  </span>
-                  {nameValue}
                 </div>
               )}
-
-              {isEditingBio ? (
+              {user?.bio && (
                 <div className="m-0 py-2">
-                  <input
-                    className="input input-bordered w-full max-w-xs text-white bg-slate-900"
-                    placeholder={bioValue}
-                    onChange={(e) => setBioValue(e.target.value)}
+                  <EditableText
+                    label="Short Bio"
+                    updateHandler={updateBioHandler}
+                    initialValue={user?.bio}
                   />
-                  <button
-                    className="text-white bg-red-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-red-200 border border-red-500 active:bg-red-400 transition-colors"
-                    onClick={(e) => {
-                      setIsEditingBio(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <div
-                    className="text-white bg-green-500 inline-block p-2 m-1 rounded-lg cursor-pointer hover:border-green-100 border border-green-500 transition-colors active:bg-green-400"
-                    onClick={updateBioHandler}
-                  >
-                    Save
-                  </div>
                 </div>
-              ) : (
-                <p
-                  className="p-2 m-0 flex items-center"
-                  onClick={() => setIsEditingBio(true)}
-                >
-                  <span className="text-slate-400 text-sm pr-2 underline w-14">
-                    Bio
-                  </span>
-                  {bioValue}
-                </p>
               )}
               <p className="text-center mt-5">
                 <button

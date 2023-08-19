@@ -14,13 +14,13 @@ import Link from "next/link";
 
 export default function UserCuratedLists() {
   const queryClient = useQueryClient();
-  const { user, address } = useProfile();
+  const { user, address, ensName } = useProfile();
   const { data, isLoading } = useQuery(
     ["userCuratedLists", address],
     async () => getUserCuratedListsByAddress(address)
   );
   const { mutate: createNewList } = useMutation({
-    mutationFn: () => createCuratedList(user.id, "Wow such list"),
+    mutationFn: () => createCuratedList(user.id, `List ${data?.length + 1}`),
     onSuccess: (a: any) => {
       queryClient.invalidateQueries({
         queryKey: ["userCuratedLists", address],
@@ -38,7 +38,7 @@ export default function UserCuratedLists() {
   });
   return (
     <div className="mb-4">
-      <div className="flex justify-between">
+      <div className="flex justify-between mb-5">
         <h3 className="text-xl pl-3 pb-3 inline-block">Curated Lists</h3>
         <button
           className="btn btn-xs btn-secondary"
@@ -47,26 +47,30 @@ export default function UserCuratedLists() {
           Create list
         </button>
       </div>
-      <div className="bg-zinc-800 p-2 pt-4 ">
+      <div className="p-2 pt-4 ">
         {!_.isEmpty(data) ? (
           _.map(data, (list, i) => {
             return (
               <div
                 key={`userCuratedList${i}`}
-                className="bg-zinc-700 p-5 mb-3 flex flex-col"
+                className="bg-gray-900 mb-10 px-1 flex flex-col"
               >
                 <EditableText
+									label="List name"
                   initialValue={list.title}
                   updateHandler={(updatedTitle) =>
                     updateListName({ id: list.id, title: updatedTitle })
                   }
                 />
-                {list.slug ? (
-                  <Link href={`/so/${list.slug}`}>
-                    <div className="flex">
+                {address && list.slug && (
+                  <Link href={`/${address}/${list.slug}`}>
+                    <div className="flex items-center justify-around bg-gray-900 hover:bg-gray-800 hover:scale-[102%] rounded-md p-0.5 transition-all m-2 mt-0">
                       {_.map(list.nfts, (nft, i) => {
                         return (
-                          <div key={`${list.title}_${i}`}>
+                          <div
+                            key={`${list.title}_${i}`}
+                            className="p-1.5"
+                          >
                             <NftImage
                               src={_.get(nft, "nft.imageURI")}
                               alt={_.get(nft, "nft.title")}
@@ -75,22 +79,11 @@ export default function UserCuratedLists() {
                           </div>
                         );
                       })}
+											{_.isEmpty(list.nfts) && (
+												<div>Add some NFTs to visit this list</div>
+											)}
                     </div>
                   </Link>
-                ) : (
-                  <div className="flex">
-                    {_.map(list.nfts, (nft, i) => {
-                      return (
-                        <div key={`${list.title}_${i}`}>
-                          <NftImage
-                            src={_.get(nft, "nft.imageURI")}
-                            alt={_.get(nft, "nft.title")}
-                            size="sm"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
                 )}
               </div>
             );

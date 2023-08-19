@@ -1,5 +1,4 @@
 "use server";
-
 import prisma from "@/prisma";
 import {
   CuratedCollection,
@@ -181,4 +180,23 @@ export async function updateNftCuratorComment(
   });
 	console.log({updatedCuration});
 	return updatedCuration;
+}
+
+export async function updateNftCurationDescription(
+	curation: number,
+	id: number,
+	toggle: boolean
+): Promise<CuratedCollectionNFT> {
+	const updatedCuration = await prisma.curatedCollectionNFT.update({
+    where: {
+      curatedCollectionId_nftId: {
+        curatedCollectionId: curation,
+        nftId: id,
+      },
+    },
+		data: {
+			showDescription: toggle
+		}
+	})
+	return updatedCuration
 }

@@ -36,7 +36,7 @@ async function getList(curator: string, slug: string) {
     where: {
       curatorId_slug: {
         curatorId: curatorData.id,
-				slug: slug,
+        slug: slug,
       },
     },
     select: {
@@ -65,6 +65,8 @@ async function getList(curator: string, slug: string) {
             },
           },
           curatorComment: true,
+          showAttributes: true,
+          showDescription: true,
           nftId: true,
         },
       },
@@ -132,7 +134,9 @@ export default async function Page({
                 >
                   {nft.title}
                 </p>
-                <Description description={nft.description} />
+                {nft.showDescription && (
+                  <Description description={nft.description} />
+                )}
               </div>
             );
           })}

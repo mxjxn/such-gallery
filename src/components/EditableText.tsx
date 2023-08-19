@@ -4,12 +4,14 @@ interface EditBlockProps {
   initialValue: string;
   updateHandler: (newVal: string) => any;
   clickToEdit?: boolean;
+	label?: string;
 }
 
 const EditableText: FC<EditBlockProps> = ({
   initialValue,
   updateHandler,
   clickToEdit = false,
+	label,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
@@ -21,9 +23,9 @@ const EditableText: FC<EditBlockProps> = ({
   };
 
   return isEditing ? (
-    <div className="m-0 py-2 flex justify-between">
+    <div className="m-0 py-2 flex justify-end">
       <input
-        className="input input-bordered w-full max-w-xs text-white bg-slate-900"
+        className="input input-bordered flex-grow text-white bg-slate-900"
         placeholder={value}
         onChange={handleInputChange}
       />
@@ -61,7 +63,7 @@ const EditableText: FC<EditBlockProps> = ({
         onClick={() => setIsEditing(true)}
         className="btn btn-xs btn-neutral"
       >
-        edit title
+        edit {label}
       </button>
     </p>
   );

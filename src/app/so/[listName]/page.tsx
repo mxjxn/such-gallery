@@ -14,6 +14,7 @@ async function getList(slug: string) {
     },
     select: {
       title: true,
+			id: true,
       curator: {
         select: {
           name: true,
@@ -53,13 +54,10 @@ export default async function Page({
   const data = await getList(params.listName);
   const list: any = _.map(data?.nfts, (nft) => ({
 		curatorComment: nft.curatorComment || "",
-		curationId: nft.id,
+		curationId: nft.nftId,
 		...nft.nft,
 	}));
   const curator = data?.curator;
-
-  console.log(data);
-
   return (
     <div className="p-8">
       <div className="w-full flex flex-col items-center">
@@ -103,7 +101,9 @@ export default async function Page({
                 </p>
 								<CuratorComment
 									comment={nft.curatorComment}
-									curationId={nft.curationId}
+									listId={data?.id || -1}
+									nftId={nft.curationId}
+									curatorId={curator?.id}
 								/>
                 <Description description={nft.description} />
               </div>

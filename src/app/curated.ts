@@ -1,7 +1,11 @@
 "use server";
 
 import prisma from "@/prisma";
-import { CuratedCollection, Prisma } from "@prisma/client";
+import {
+  CuratedCollection,
+  CuratedCollectionNFT,
+  Prisma,
+} from "@prisma/client";
 import _ from "lodash";
 
 export async function createCuratedList(
@@ -116,8 +120,8 @@ export async function getUserCuratedListsByAddress(
       curatorId: user.id,
     },
     select: {
-			title: true,
-			slug: true,
+      title: true,
+      slug: true,
       nfts: {
         include: {
           nft: true,
@@ -138,4 +142,22 @@ export async function updateCuratedListTitle(
     data: { title: title },
   });
   return curatedCollection;
+}
+
+export async function updateNftCuratorComment(
+  curation: number,
+  id: number,
+  note: string
+): Promise<CuratedCollectionNFT> {
+  const updatedCuration = await prisma.curatedCollectionNFT.update({
+    where: {
+      curatedCollectionId_nftId: {
+        curatedCollectionId: curation,
+        nftId: id,
+      },
+    },
+    data: { curatorComment: note },
+  });
+	console.log({updatedCuration});
+	return updatedCuration;
 }

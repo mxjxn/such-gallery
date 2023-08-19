@@ -1,4 +1,4 @@
-export default function handleImageUrl(url: string) {
+export default function handleImageUrl(url: string | undefined | null) {
   if (!url) {
     return "";
   }

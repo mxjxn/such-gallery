@@ -4,12 +4,13 @@ import { Prisma } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { AddToList, CurateWithoutSaving  } from "./NftCards";
+import { FullNft } from "@/types/types";
 
 export default function NftActions({
   nft,
   onSave,
 }: {
-  nft: Prisma.NFTCreateInput;
+  nft: FullNft;
   onSave: () => void;
 }) {
   const queryClient = useQueryClient();

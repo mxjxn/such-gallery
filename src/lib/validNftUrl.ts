@@ -1,8 +1,8 @@
-import { Nft } from "@/types/types";
+import { NftId } from "@/types/types";
 
 interface IUrlParser {
   validate: (url: string) => boolean;
-  parse: (url: string) => Nft | null;
+  parse: (url: string) => NftId | null;
 }
 
 // Generic function to create a validator and a parser
@@ -28,7 +28,7 @@ export function validateUrl(url: string): boolean {
   return urlParsers.some(parser => parser.validate(url));
 }
 
-export function parseUrl(url: string): Nft | null {
+export function parseUrl(url: string): NftId | null {
   const parser = urlParsers.find(parser => parser.validate(url));
   return parser ? parser.parse(url) : null;
 }

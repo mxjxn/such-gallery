@@ -1,7 +1,9 @@
 "use server";
 
 import prisma from "@/prisma";
+import { FullNft } from "@/types/types";
 import { Prisma } from "@prisma/client";
+import _, { clamp } from "lodash";
 
 export async function getNftsByUser(ethAddress: string) {
   const user = await prisma.user.findUnique({
@@ -15,11 +17,7 @@ export async function getNftsByUser(ethAddress: string) {
   return user?.nfts;
 }
 
-export async function addNftToUser(
-  ethAddress: string,
-  nftData: Prisma.NFTCreateInput
-) {
-  // Try to find the NFT first
+export async function addNftToUser(ethAddress: string, nftData: FullNft) {
   let nft: any;
   try {
     nft = await prisma.nFT.findUnique({
@@ -29,20 +27,43 @@ export async function addNftToUser(
           tokenId: nftData.tokenId,
         },
       },
+      select: {
+        id: true,
+      },
     });
   } catch (e: any) {
-    throw new Error(e);
+    console.error("Error fetching existing NFT", e);
   }
-  // If not found - create it
-  if (!nft) {
+  if (!nft?.id) {
     try {
       nft = await prisma.nFT.create({
-        data: nftData,
+        data: {
+          metadataURI: nftData.metadataURI,
+          imageURI: nftData.imageURI || "",
+          title: nftData.title,
+          description: nftData.description,
+          tokenId: nftData.tokenId,
+					collection: {
+						connectOrCreate: {
+							where: {
+								contractAddress: nftData.contractAddress,
+							},
+							create: {
+								contractAddress: nftData.contractAddress,
+								name: nftData.collectionName,
+							}
+						}
+					}
+        },
+				select: {
+					id: true
+				},
       });
     } catch (e: any) {
       throw new Error(e);
     }
   }
+
   // find user and update nfts
   const userWithNft = await prisma.user.update({
     where: { ethAddress },
@@ -57,6 +78,9 @@ export async function addNftToUser(
       nfts: true,
     },
   });
+	console.log({
+		nft, userWithNft
+	})
   return userWithNft;
 }
 
@@ -95,9 +119,15 @@ export async function deleteNftFromUser(
   return userWithoutNft;
 }
 
-
-export async function removeNftFromUser(ethAddress: string, contractAddress: string, tokenId:string) {
-	const nftId: Prisma.NFTContractAddressTokenIdCompoundUniqueInput = { contractAddress, tokenId };
+export async function removeNftFromUser(
+  ethAddress: string,
+  contractAddress: string,
+  tokenId: string
+) {
+  const nftId: Prisma.NFTContractAddressTokenIdCompoundUniqueInput = {
+    contractAddress,
+    tokenId,
+  };
   const userWithNftRemoved = await prisma.user.update({
     where: { ethAddress },
     data: {

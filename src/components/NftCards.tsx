@@ -15,6 +15,7 @@ import {
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
 import { Prisma } from "@prisma/client";
+import { FullNft } from "@/types/types";
 
 const imageSizes = { xs: 30, sm: 60, md: 120, lg: 240, xl: 480, "2xl": 960 };
 
@@ -109,7 +110,7 @@ const NftCard = ({
 export const CurateWithoutSaving = ({
   nft,
 }: {
-  nft: Prisma.NFTCreateInput;
+  nft: FullNft;
 }) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -149,8 +150,8 @@ export const CurateWithoutSaving = ({
           }`}
         >
           {!_.isEmpty(data) &&
-            _.map(data, (list) => (
-              <li key={`add-${nft.contractAddress}/${nft.tokenId}`}>
+            _.map(data, (list, i) => (
+              <li key={`add-${nft.contractAddress}/${nft.tokenId}${i}`}>
                 <a
                   onClick={() => {
                     addToList(list.id);

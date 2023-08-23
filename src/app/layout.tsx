@@ -10,7 +10,6 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
 import { inter } from "@/fonts";
-import { createPublicClient, http } from "viem";
 import Header from "@/components/Header";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

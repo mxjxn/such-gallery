@@ -1,5 +1,5 @@
 import { endpoint, networks } from "@/utils/zora";
-import { Metadata, NftId } from "@/types/types";
+import { FullNft, NftId } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { ZDK } from "@zoralabs/zdk";
 import {
@@ -48,28 +48,14 @@ async function getCollectionName({
   return banana;
 }
 
-export function zoraToSuchNft(nft) {
-  const n = nft?.token;
-  if (!nft) throw new Error("No nft found");
-  return {
-    contractAddress: n.token.collectionAddress,
-    collectionName: n.collectionName,
-    tokenId: n.token.tokenId,
-    metadataURI: n.token.tokenUrl || "",
-    imageURI: handleImageUrl(n.token.image?.url),
-    title: n.token.name || "",
-    description: n.token.description || "",
-  };
-}
-
 type UseNftReturn = {
-  data: Partial<FullNft>;
+  data: FullNft | undefined;
   isEnabled: boolean;
   isLoading: boolean;
   isError: boolean;
 };
 
-export function useNft(nft: NftId): UseNftReturn {
+export function useNft(nft: NftId | null): UseNftReturn {
   const { contractAddress = "", tokenId = "", chain = "1" } = nft || {};
   const { data: collectionName } = useQuery(
     ["nftCollectionName", contractAddress],
@@ -83,9 +69,14 @@ export function useNft(nft: NftId): UseNftReturn {
   );
   const { data, isLoading, isError } = useQuery(
     ["nft", [chain, contractAddress, tokenId]],
-    () => getNft(nft, true),
+    () => {
+      if (!nft?.contractAddress || !nft?.tokenId) {
+        return Promise.resolve({});
+      }
+      return getNft(nft, true);
+    },
     {
-      enabled: !!contractAddress && !!tokenId,
+      enabled: !!nft?.contractAddress && !!nft?.tokenId,
       onError: (error) => {
         console.error("error at zora getToken call", error);
       },
@@ -95,18 +86,19 @@ export function useNft(nft: NftId): UseNftReturn {
     }
   );
   return {
-    data: {
-      contractAddress: nft?.contractAddress,
+    data: !!nft && data ? {
+      contractAddress: nft.contractAddress,
       tokenId: nft?.tokenId || "-1",
-      title: data?.token?.token.name || undefined,
-      imageURI: data?.token?.token.image?.url || undefined,
-      metadataURI: data?.token?.token.tokenUrl || undefined,
+      title: _.get(data, "token.token.name", ""),
+      imageURI: _.get(data, "token.token.image.url", ""),
+      metadataURI: _.get(data, "token.token.tokenUrl", ""),
+			metadata: _.get(data, 'token.token.metadata', {}),
       collectionName: _.get(
         collectionName,
         "collections.nodes.at(0).name",
         undefined
       ),
-    },
+    }: undefined,
     isEnabled: !!contractAddress && !!tokenId,
     isError,
     isLoading,

@@ -311,7 +311,7 @@ const NftListItem = ({
 
         {isOpen && !!onDelete && (
           <div className="flex justify-start items-center">
-            <AddToList nftId={nft.id} onSelect={onAddToList} />
+            <AddToList nftId={nft.id} />
             <div className="text-red-500 hover:text-red-400 active:text-red-300 pr-2 m-2">
               <XCircleIcon
                 className=" w-6 h-6 inline-block pr-1"

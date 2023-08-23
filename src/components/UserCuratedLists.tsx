@@ -77,7 +77,7 @@ export default function UserCuratedLists() {
                   updateHandler={(title) => updateListName({ list, title })}
                 />
                 {address && list.slug && (
-                  <Link href={`/${address}/${list.slug}`}>
+                  <Link href={`/${ensName || address}/${list.slug}`}>
                     <div className="flex items-center justify-around bg-gray-900 hover:bg-gray-800 hover:scale-[102%] rounded-md p-0.5 transition-all m-2 mt-0">
                       {_.map(list.nfts, (nft, i) => {
                         return (
@@ -102,7 +102,7 @@ export default function UserCuratedLists() {
         ) : (
           <div className="">
             <p className="bg-zinc-700 p-5 mb-3">You have no curated lists.</p>
-            <button className="btn btn-primary" onClick={createNewList}>
+            <button className="btn btn-primary" onClick={()=>createNewList()}>
               Create a curated list
             </button>
           </div>

@@ -75,10 +75,31 @@ export async function addNewNftToCuratedList(
   if (!nft) {
     try {
       nft = await prisma.nFT.create({
-        data: nftData,
+        data: {
+					title: nftData.title,
+					metadataURI: nftData.metadataURI,
+					tokenId: nftData.tokenId,
+					imageURI: nftData.imageURI || "",
+					description: nftData.description,
+					collection: {
+						connectOrCreate: {
+							where: {
+									contractAddress: nftData.contractAddress,
+								},
+								create: {
+									contractAddress: nftData.contractAddress,
+									name: nftData.collectionName
+								}
+						}
+					},
+				},
+				select: {
+					id: true
+				}
       });
     } catch (e: any) {
       console.error("Error saving NFT to server", e);
+			throw new Error(e)
     }
   }
   if (!_.isEmpty(nft)) {
@@ -103,7 +124,7 @@ export async function addNewNftToCuratedList(
       console.error("Error fetching finalized curatedCollection", e);
     }
   }
-  return resultingCollection;
+  return resultingCollection || null;
 }
 
 export async function getUserCuratedLists(

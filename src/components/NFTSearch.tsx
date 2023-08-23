@@ -6,17 +6,15 @@ import LabeledField from "@/components/LabeledField";
 import NftActions from "@/components/NftActions";
 import { NftId } from "@/types/types";
 import Image from "next/image";
-import handleImageUrl from "@/lib/handleImageUrls";
 import { useNft } from "@/hooks/useNft";
 import _ from "lodash";
-import { zoraToSuchNft } from "@/utils/zora";
 
 export default function NFTSearch() {
   // a useRef for the input field
   const inputRef = React.useRef<HTMLInputElement>(null);
   // latest valid input value
   const [inputValue, setInputValue] = React.useState("");
-  const nftInput: NftId = parseUrl(inputValue);
+  const nftInput: NftId | null = parseUrl(inputValue);
   // retrieve metadata from Zora API
   const { data: nft, isLoading, isEnabled, isError } = useNft(nftInput);
 
@@ -62,7 +60,7 @@ export default function NFTSearch() {
           <div>Loading...</div>
         </div>
       )}
-      {!!nft.contractAddress && !!nft.tokenId && !isError && !!nft.imageURI && (
+      {!!nft && nft.contractAddress && nft.tokenId && !isError && !!nft.imageURI && (
         <div>
           <div className={` my-5 py-2 px-2  bg-slate-800 rounded-xl `}>
             <div
@@ -98,8 +96,9 @@ export default function NFTSearch() {
                   <NftActions
                     nft={nft}
                     onSave={() => {
-                      if (!_.isNull(inputRef.current))
+                      if (!_.isNull(inputRef.current)) {
                         inputRef.current.value = "";
+                      }
                       setInputValue("");
                     }}
                   />

@@ -3,9 +3,6 @@ import {
   ZDKNetwork as N,
   ZDKChain as C,
 } from "@zoralabs/zdk";
-import handleImageUrl from "@/lib/handleImageUrls";
-import { Prisma } from "@prisma/client";
-import { NftInput } from "@/app/nfts";
 
 export const endpoint = "https://api.zora.co/graphql";
 export type NetworkInput = {

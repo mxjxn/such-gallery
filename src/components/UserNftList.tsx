@@ -49,10 +49,9 @@ export default function UserNftList({ address }: { address: string }) {
           <div className="w-full pb-0 flex flex-row items-center flex-row justify-between justify-items-start">
             <p className="pl-2 text-2xl text-center">Saved NFTs</p>
             <div className="cursor-pointer label inline-block py-2 flex items-center">
-              <span className="label-text p-5">
-                {cardView ? "Card" : "List"} View
+              <span className="label-text px-5">
+                List
               </span>
-
               <input
                 type="checkbox"
                 className="toggle toggle-primary"
@@ -64,6 +63,10 @@ export default function UserNftList({ address }: { address: string }) {
                   }
                 }}
               />
+
+              <span className="label-text p-5">
+                Cards
+              </span>
             </div>
           </div>
           <div className=" rounded-2xl border-4 border-slate-800 mb-4">

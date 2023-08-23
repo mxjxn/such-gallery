@@ -23,7 +23,6 @@ interface UseProfileReturn {
   displayName: string | null;
   user: any;
   signMessage: any; // replace with actual type
-  updateProfile: Promise<any>;
   signData: any; // replace with actual type
   isError: boolean;
   isLoading: boolean;
@@ -39,8 +38,7 @@ export function useProfile(): UseProfileReturn {
   const [user, setUser] = useState<any>({});
   const userAddress = user?.ethAddress;
   const userEnsName = user?.ensName;
-  const ensName = useEnsName({ address });
-  const ensData = ensName.data;
+  const { data: ensData, isLoading: isLoadingEns, isError: isEnsError, error: ensError } = useEnsName({ address, chainId: 1 });
   const {
     data: signData,
     isError,
@@ -77,7 +75,10 @@ export function useProfile(): UseProfileReturn {
       };
       updateUser();
     }
-  }, [isConnected, address, ensData, userAddress, userEnsName]);
+		console.log({
+isConnected, address, ensData, userAddress, userEnsName, isLoadingEns, ensError,isEnsError
+		})
+  }, [isConnected, address, ensData, userAddress, userEnsName, isLoadingEns, ensError,isEnsError]);
 
   //	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
   //useEffect(() => {
@@ -88,12 +89,11 @@ export function useProfile(): UseProfileReturn {
     disconnect,
     isConnected,
     address: userAddress,
-    ensName,
+    ensName: ensData,
     displayName: address
       ? `${address.slice(0, 6)}...${address.slice(-4)}`
       : null,
     user,
-    updateProfile: (address: string, name: string, bio: string) => {},
     signMessage,
     signData,
     isError,

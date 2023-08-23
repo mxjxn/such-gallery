@@ -55,7 +55,7 @@ function ProfileLogin() {
           <dialog id="my_modal_2" className="modal " ref={modalRef}>
             <form method="dialog" className="modal-box border-8 border-sky-800">
               <p className="pl-0 p-2 mb-2 bg-green-100 text-green-800 rounded-xl tracking-widest text-center">
-                Connected with {ensName?.data ?? displayName}
+                Connected with {ensName ?? displayName}
               </p>
               {user?.name && (
                 <div className="m-0 py-2">
@@ -108,7 +108,7 @@ function ProfileLogin() {
             onClick={openAccountModal}
             className="border uppercase text-sm text-neutral-200 hover:text-neutral-50 border-sky-300 rounded-full p-2 inline-block bg-gradient-to-r from-sky-800 to-sky-950 m-1"
           >
-            {ensName?.data ?? displayName}
+            {ensName ?? displayName}
           </button>
         </div>
       ) : (

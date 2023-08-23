@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from 'iron-session/next'
+// import { withIronSessionApiRoute } from 'iron-session/next'
 import { NextApiHandler } from 'next'
 import { SERVER_SESSION_SETTINGS } from './config'
 
@@ -17,6 +17,7 @@ type SiweMessage = {
   resources?: Array<string>;
 }
 
+/*
 declare module 'iron-session' {
   interface IronSessionData {
     nonce: string
@@ -28,3 +29,4 @@ declare module 'iron-session' {
 export function withSessionRoute(handler: NextApiHandler) {
   return withIronSessionApiRoute(handler, SERVER_SESSION_SETTINGS)
 }
+*/

@@ -1,5 +1,6 @@
 "use server";
 import prisma from "@/prisma";
+import { FullNft } from "@/types/types";
 import {
   CuratedCollection,
   CuratedCollectionNFT,
@@ -8,21 +9,20 @@ import {
 import _ from "lodash";
 
 function convertToKebabCase(str: string): string {
-    // Convert to lowercase and replace unwanted characters and spaces with hyphens
-    let result = str.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  // Convert to lowercase and replace unwanted characters and spaces with hyphens
+  let result = str.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-    // Remove leading or trailing hyphens
-    result = result.replace(/^-|-$/g, '');
+  // Remove leading or trailing hyphens
+  result = result.replace(/^-|-$/g, "");
 
-    // Limit to 5 words
-    let words = result.split('-');
-    if (words.length > 5) {
-        result = words.slice(0, 5).join('-');
-    }
+  // Limit to 5 words
+  let words = result.split("-");
+  if (words.length > 5) {
+    result = words.slice(0, 5).join("-");
+  }
 
-    return result;
+  return result;
 }
-
 
 export async function createCuratedList(
   userId: number,
@@ -32,7 +32,7 @@ export async function createCuratedList(
     data: {
       curatorId: userId,
       title: title,
-			slug: convertToKebabCase(title),
+      slug: convertToKebabCase(title),
     },
   });
 
@@ -42,21 +42,21 @@ export async function createCuratedList(
 export async function addNftToCuratedList(
   nftId: number,
   listId: number
-): Promise<CuratedCollection> {
+): Promise<CuratedCollection | null> {
   const curatedCollectionNFT = await prisma.curatedCollectionNFT.create({
     data: {
       curatedCollectionId: listId,
       nftId: nftId,
     },
   });
-  return prisma.curatedCollection.findUnique({
+  return await prisma.curatedCollection.findUnique({
     where: { id: curatedCollectionNFT.curatedCollectionId },
     include: { nfts: true },
   });
 }
 
 export async function addNewNftToCuratedList(
-  nftData: Prisma.NFTCreateInput,
+  nftData: FullNft,
   listId: number
 ): Promise<CuratedCollection | null> {
   let nft, curatedCollectionNFT, resultingCollection;
@@ -65,7 +65,7 @@ export async function addNewNftToCuratedList(
       where: {
         contractAddress_tokenId: {
           contractAddress: nftData.contractAddress,
-          tokenId: nftData.tokenId,
+          tokenId: String(nftData.tokenId),
         },
       },
     });
@@ -75,10 +75,31 @@ export async function addNewNftToCuratedList(
   if (!nft) {
     try {
       nft = await prisma.nFT.create({
-        data: nftData,
+        data: {
+					title: nftData.title,
+					metadataURI: nftData.metadataURI,
+					tokenId: nftData.tokenId,
+					imageURI: nftData.imageURI || "",
+					description: nftData.description,
+					collection: {
+						connectOrCreate: {
+							where: {
+									contractAddress: nftData.contractAddress,
+								},
+								create: {
+									contractAddress: nftData.contractAddress,
+									name: nftData.collectionName
+								}
+						}
+					},
+				},
+				select: {
+					id: true
+				}
       });
     } catch (e: any) {
       console.error("Error saving NFT to server", e);
+			throw new Error(e)
     }
   }
   if (!_.isEmpty(nft)) {
@@ -103,7 +124,7 @@ export async function addNewNftToCuratedList(
       console.error("Error fetching finalized curatedCollection", e);
     }
   }
-  return resultingCollection;
+  return resultingCollection || null;
 }
 
 export async function getUserCuratedLists(
@@ -138,6 +159,7 @@ export async function getUserCuratedListsByAddress(
     },
     select: {
       title: true,
+      curatorId: true,
       slug: true,
       nfts: {
         include: {
@@ -150,16 +172,26 @@ export async function getUserCuratedListsByAddress(
   return curatedCollections;
 }
 
+export type CuratedCollectionId = {
+  curatorId: number;
+  slug: string;
+};
+
 export async function updateCuratedListTitle(
-  id: number,
+  collection: CuratedCollectionId,
   title: string
 ): Promise<CuratedCollection> {
   const curatedCollection = await prisma.curatedCollection.update({
-    where: { id: id },
+    where: {
+      curatorId_slug: {
+        curatorId: collection.curatorId,
+        slug: collection.slug,
+      },
+    },
     data: {
-			title: title,
-			slug: convertToKebabCase(title),
-		},
+      title: title,
+      slug: convertToKebabCase(title),
+    },
   });
   return curatedCollection;
 }
@@ -178,25 +210,25 @@ export async function updateNftCuratorComment(
     },
     data: { curatorComment: note },
   });
-	console.log({updatedCuration});
-	return updatedCuration;
+  console.log({ updatedCuration });
+  return updatedCuration;
 }
 
 export async function updateNftCurationDescription(
-	curation: number,
-	id: number,
-	toggle: boolean
+  curation: number,
+  id: number,
+  toggle: boolean
 ): Promise<CuratedCollectionNFT> {
-	const updatedCuration = await prisma.curatedCollectionNFT.update({
+  const updatedCuration = await prisma.curatedCollectionNFT.update({
     where: {
       curatedCollectionId_nftId: {
         curatedCollectionId: curation,
         nftId: id,
       },
     },
-		data: {
-			showDescription: toggle
-		}
-	})
-	return updatedCuration
+    data: {
+      showDescription: toggle,
+    },
+  });
+  return updatedCuration;
 }

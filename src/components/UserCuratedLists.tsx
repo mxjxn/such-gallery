@@ -5,6 +5,7 @@ import {
   createCuratedList,
   getUserCuratedListsByAddress,
   updateCuratedListTitle,
+  type CuratedCollectionId,
 } from "@/app/curated";
 import _ from "lodash";
 import { useProfile } from "@/hooks/useProfile";
@@ -28,14 +29,29 @@ export default function UserCuratedLists() {
     },
   });
   const { mutate: updateListName } = useMutation({
-    mutationFn: ({ id, title }: { id: number; title: string }) =>
-      updateCuratedListTitle(id, title),
+    mutationFn: ({
+      list,
+      title,
+    }: {
+      list: CuratedCollectionId;
+      title: string;
+    }) => {
+      console.log({ list });
+      return updateCuratedListTitle(
+        {
+          slug: list.slug,
+          curatorId: list.curatorId,
+        },
+        title
+      );
+    },
     onSuccess: (a: any) => {
       queryClient.invalidateQueries({
         queryKey: ["userCuratedLists", address],
       });
     },
   });
+
   return (
     <div className="mb-4">
       <div className="flex justify-between mb-5">
@@ -56,21 +72,16 @@ export default function UserCuratedLists() {
                 className="bg-gray-900 mb-10 px-1 flex flex-col"
               >
                 <EditableText
-									label="List name"
+                  label="List name"
                   initialValue={list.title}
-                  updateHandler={(updatedTitle) =>
-                    updateListName({ id: list.id, title: updatedTitle })
-                  }
+                  updateHandler={(title) => updateListName({ list, title })}
                 />
                 {address && list.slug && (
-                  <Link href={`/${address}/${list.slug}`}>
+                  <Link href={`/${ensName || address}/${list.slug}`}>
                     <div className="flex items-center justify-around bg-gray-900 hover:bg-gray-800 hover:scale-[102%] rounded-md p-0.5 transition-all m-2 mt-0">
                       {_.map(list.nfts, (nft, i) => {
                         return (
-                          <div
-                            key={`${list.title}_${i}`}
-                            className="p-1.5"
-                          >
+                          <div key={`${list.title}_${i}`} className="p-1.5">
                             <NftImage
                               src={_.get(nft, "nft.imageURI")}
                               alt={_.get(nft, "nft.title")}
@@ -79,9 +90,9 @@ export default function UserCuratedLists() {
                           </div>
                         );
                       })}
-											{_.isEmpty(list.nfts) && (
-												<div>Add some NFTs to visit this list</div>
-											)}
+                      {_.isEmpty(list.nfts) && (
+                        <div>Add some NFTs to visit this list</div>
+                      )}
                     </div>
                   </Link>
                 )}
@@ -91,7 +102,7 @@ export default function UserCuratedLists() {
         ) : (
           <div className="">
             <p className="bg-zinc-700 p-5 mb-3">You have no curated lists.</p>
-            <button className="btn btn-primary" onClick={createNewList}>
+            <button className="btn btn-primary" onClick={()=>createNewList()}>
               Create a curated list
             </button>
           </div>

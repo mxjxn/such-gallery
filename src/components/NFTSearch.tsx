@@ -4,19 +4,17 @@ import { validateUrl, parseUrl } from "@/lib/validNftUrl";
 import CopyTextComponent from "@/components/CopyText";
 import LabeledField from "@/components/LabeledField";
 import NftActions from "@/components/NftActions";
-import { Nft } from "@/types/types";
+import { NftId } from "@/types/types";
 import Image from "next/image";
-import handleImageUrl from "@/lib/handleImageUrls";
 import { useNft } from "@/hooks/useNft";
 import _ from "lodash";
-import { zoraToSuchNft } from "@/utils/zora";
 
 export default function NFTSearch() {
   // a useRef for the input field
   const inputRef = React.useRef<HTMLInputElement>(null);
   // latest valid input value
   const [inputValue, setInputValue] = React.useState("");
-  const nftInput: Nft = parseUrl(inputValue);
+  const nftInput: NftId | null = parseUrl(inputValue);
   // retrieve metadata from Zora API
   const { data: nft, isLoading, isEnabled, isError } = useNft(nftInput);
 
@@ -62,7 +60,7 @@ export default function NFTSearch() {
           <div>Loading...</div>
         </div>
       )}
-      {nft?.token && !isError && (
+      {!!nft && nft.contractAddress && nft.tokenId && !isError && !!nft.imageURI && (
         <div>
           <div className={` my-5 py-2 px-2  bg-slate-800 rounded-xl `}>
             <div
@@ -70,8 +68,8 @@ export default function NFTSearch() {
             >
               <div className="p-2 w-full bg-black block-inline flex justify-around rounded-md">
                 <Image
-                  src={handleImageUrl(nft.token.token.image.url)}
-                  alt={nft.token.token.name}
+                  src={nft.imageURI}
+                  alt={nft.title || ""}
                   width={256}
                   height={256}
                 />
@@ -79,27 +77,28 @@ export default function NFTSearch() {
               <div className="flex flex-col">
                 <div className="mt-3 xl:mt-0 xl:mr-3">
                   <LabeledField inline label={"Name"}>
-                    <div className="text-lg">{nft.token.token.name}</div>
+                    <div className="text-lg">{nft.title}</div>
                   </LabeledField>
                   <LabeledField inline label={"Creator"}>
-                    {nft.token.token.metadata.created_by}
+                    {nft?.metadata?.created_by}
                   </LabeledField>
                   <LabeledField inline label={"Contract"} className="p-0 m-0">
                     <CopyTextComponent
-                      text={nft.token.token.collectionAddress}
+                      text={nft.contractAddress}
                       className="py-1"
                     />
                   </LabeledField>
                   <LabeledField inline label={"Token ID"}>
-                    {nft.token.token.tokenId}
+                    {nft.tokenId}
                   </LabeledField>
                 </div>
                 <div className={`w-full`}>
                   <NftActions
-                    nft={zoraToSuchNft(nft.token)}
+                    nft={nft}
                     onSave={() => {
-                      if (!_.isNull(inputRef.current))
+                      if (!_.isNull(inputRef.current)) {
                         inputRef.current.value = "";
+                      }
                       setInputValue("");
                     }}
                   />

@@ -7,7 +7,6 @@ import {
   optimism,
   arbitrum,
 } from "@wagmi/core/chains";
-import styles from "../styles";
 
 export const SITE_NAME = "Such Gallery";
 export const SITE_DESCRIPTION = "a community-curated gallery for NFTs";

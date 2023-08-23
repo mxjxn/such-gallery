@@ -8,15 +8,13 @@ import CuratorComment from "./CuratorComment";
 
 async function getList(curator: string, slug: string) {
   "use server";
-  // first check if curator string is an ens name
   const isEnsName: boolean = _.endsWith(curator, ".eth");
   const isEthAddress: boolean =
     _.startsWith(curator, "0x") && curator.length === 42;
-  const curatorLookup: Prisma.UserWhereUniqueInput = isEnsName
-    ? { ensName: curator }
-    : isEthAddress
-    ? { ethAddress: curator }
-    : { id: -1 };
+  const curatorLookup: Prisma.UserWhereUniqueInput 
+		= isEnsName ? { ensName: curator }
+			: isEthAddress ? { ethAddress: curator }
+			: { id: -1 };
   if (curatorLookup.id === -1) {
     console.error("user not found");
     return null;
@@ -31,8 +29,9 @@ async function getList(curator: string, slug: string) {
   if (!curatorData) {
     throw new Error("user not found");
   }
+	
   // otherwise if its a valid eth address
-  return await prisma.curatedCollection.findUnique({
+  const collection = await prisma.curatedCollection.findUnique({
     where: {
       curatorId_slug: {
         curatorId: curatorData.id,
@@ -72,6 +71,8 @@ async function getList(curator: string, slug: string) {
       },
     },
   });
+
+	return collection;
 }
 
 export default async function Page({
@@ -108,12 +109,15 @@ export default async function Page({
                 className="flex flex-col mt-8 mb-36 -mx-5"
                 key={`nft-${i}-${nft.title}`}
               >
-                <CuratorComment
-                  comment={nft.curatorComment}
-                  listId={data?.id || -1}
-                  nftId={nft.curationId}
-                  curatorId={curator?.id}
-                />
+
+								{ !!nft.curatorComment && 
+									<CuratorComment
+									comment={nft.curatorComment}
+									listId={data?.id || -1}
+									nftId={nft.curationId}
+									curatorId={curator?.id}
+									/>
+								}
                 <div className="bg-gradient-to-b from-slate-950 to-slate-900 border border-gray-800 rounded-xl p-5 mb-5 h-4/5">
                   <Image
                     src={nft.imageURI}

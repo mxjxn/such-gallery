@@ -5,16 +5,18 @@ import _ from "lodash";
 import Image from "next/image";
 import Description from "./Description";
 import CuratorComment from "./CuratorComment";
+import ManifoldAuctionDetails from "@/components/ManifoldAuctionDetails";
 
 async function getList(curator: string, slug: string) {
   "use server";
   const isEnsName: boolean = _.endsWith(curator, ".eth");
   const isEthAddress: boolean =
     _.startsWith(curator, "0x") && curator.length === 42;
-  const curatorLookup: Prisma.UserWhereUniqueInput 
-		= isEnsName ? { ensName: curator }
-			: isEthAddress ? { ethAddress: curator }
-			: { id: -1 };
+  const curatorLookup: Prisma.UserWhereUniqueInput = isEnsName
+    ? { ensName: curator }
+    : isEthAddress
+    ? { ethAddress: curator }
+    : { id: -1 };
   if (curatorLookup.id === -1) {
     console.error("user not found");
     return null;
@@ -29,7 +31,7 @@ async function getList(curator: string, slug: string) {
   if (!curatorData) {
     throw new Error("user not found");
   }
-	
+
   // otherwise if its a valid eth address
   const collection = await prisma.curatedCollection.findUnique({
     where: {
@@ -57,6 +59,8 @@ async function getList(curator: string, slug: string) {
               title: true,
               description: true,
               contractAddress: true,
+              manifoldBuyNowListing: true,
+              manifoldAuctionListing: true,
               tokenId: true,
               metadataURI: true,
               imageURI: true,
@@ -72,7 +76,7 @@ async function getList(curator: string, slug: string) {
     },
   });
 
-	return collection;
+  return collection;
 }
 
 export default async function Page({
@@ -109,15 +113,14 @@ export default async function Page({
                 className="flex flex-col mt-8 mb-36 -mx-5"
                 key={`nft-${i}-${nft.title}`}
               >
-
-								{ !!nft.curatorComment && 
-									<CuratorComment
-									comment={nft.curatorComment}
-									listId={data?.id || -1}
-									nftId={nft.curationId}
-									curatorId={curator?.id}
-									/>
-								}
+                {!!nft.curatorComment && (
+                  <CuratorComment
+                    comment={nft.curatorComment}
+                    listId={data?.id || -1}
+                    nftId={nft.curationId}
+                    curatorId={curator?.id}
+                  />
+                )}
                 <div className="bg-gradient-to-b from-slate-950 to-slate-900 border border-gray-800 rounded-xl p-5 mb-5 h-4/5">
                   <Image
                     src={nft.imageURI}
@@ -140,6 +143,13 @@ export default async function Page({
                 </p>
                 {nft.showDescription && (
                   <Description description={nft.description} />
+                )}
+                {!!nft.manifoldBuyNowListing && (
+                  <div className="text-xl">Buy me now</div>
+                )}
+                {!!nft.manifoldAuctionListing && (
+									<ManifoldAuctionDetails listingId={nft.manifoldAuctionListing} />
+
                 )}
               </div>
             );

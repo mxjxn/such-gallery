@@ -8,7 +8,6 @@ import {
   SortDirection,
   TokenQuery,
 } from "@zoralabs/zdk/dist/queries/queries-sdk";
-import handleImageUrl from "@/lib/handleImageUrls";
 import _ from "lodash";
 
 const zdk = new ZDK({ networks, endpoint });
@@ -44,27 +43,28 @@ async function getCollectionName({
       sortKey: CollectionSortKey.Name,
     },
   });
-  console.log("🍌", { banana });
   return banana;
 }
 
 type UseNftReturn = {
-  data: FullNft | undefined;
-  isEnabled: boolean;
+  data: Partial<FullNft> | undefined;
   isLoading: boolean;
   isError: boolean;
 };
 
-export function useNft(nft: NftId | null): UseNftReturn {
+type UseNftOptions = {
+	isEnabled?: boolean;
+}
+
+export function useNft(nft: NftId | null, opts?:UseNftOptions): UseNftReturn {
   const { contractAddress = "", tokenId = "", chain = "1" } = nft || {};
+	const { isEnabled = true } = opts || {};
   const { data: collectionName } = useQuery(
     ["nftCollectionName", contractAddress],
-    () => getCollectionName({ contractAddress }),
+    async () => await getCollectionName({ contractAddress }),
     {
-      enabled: !!contractAddress,
-      onSuccess: (data) => {
-        console.log("data", data);
-      },
+      enabled: isEnabled,
+      onSuccess: (data) => { },
     }
   );
   const { data, isLoading, isError } = useQuery(
@@ -76,13 +76,11 @@ export function useNft(nft: NftId | null): UseNftReturn {
       return getNft(nft, true);
     },
     {
-      enabled: !!nft?.contractAddress && !!nft?.tokenId,
+      enabled: isEnabled,
       onError: (error) => {
         console.error("error at zora getToken call", error);
       },
-      onSuccess: (data) => {
-        console.log("data", data);
-      },
+      onSuccess: (data) => { },
     }
   );
   return {
@@ -99,7 +97,6 @@ export function useNft(nft: NftId | null): UseNftReturn {
         undefined
       ),
     }: undefined,
-    isEnabled: !!contractAddress && !!tokenId,
     isError,
     isLoading,
   };

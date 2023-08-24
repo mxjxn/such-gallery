@@ -1,9 +1,9 @@
 "use server";
 
 import prisma from "@/prisma";
-import { FullNft } from "@/types/types";
+import { FullNft, FullNftWithListing } from "@/types/types";
 import { Prisma } from "@prisma/client";
-import _, { clamp } from "lodash";
+import _ from "lodash";
 
 export async function getNftsByUser(ethAddress: string) {
   const user = await prisma.user.findUnique({
@@ -17,7 +17,10 @@ export async function getNftsByUser(ethAddress: string) {
   return user?.nfts;
 }
 
-export async function addNftToUser(ethAddress: string, nftData: FullNft) {
+export async function addNftToUser(
+  ethAddress: string,
+  nftData: FullNft | FullNftWithListing
+) {
   let nft: any;
   try {
     nft = await prisma.nFT.findUnique({
@@ -35,6 +38,27 @@ export async function addNftToUser(ethAddress: string, nftData: FullNft) {
     console.error("Error fetching existing NFT", e);
   }
   if (!nft?.id) {
+    let listingData: any,
+		    listingType: number = 0; // 0 is no listing, 1 is buynow, 2 is auction
+    if ("listingId" in nftData) {
+			listingType = nftData.listingType;
+      listingData = {
+        connectOrCreate: {
+          where: {
+            listingId: nftData.listingId,
+          },
+          create: {
+            listingId: nftData.listingId,
+            seller: nftData.seller,
+            finalized: nftData.finalized,
+          },
+        },
+      };
+      if (nftData.totalAvailable) {
+        listingData.connectOrCreate.create.totalAvailable =
+          nftData.totalAvailable;
+      }
+    }
     try {
       nft = await prisma.nFT.create({
         data: {
@@ -43,21 +67,23 @@ export async function addNftToUser(ethAddress: string, nftData: FullNft) {
           title: nftData.title,
           description: nftData.description,
           tokenId: nftData.tokenId,
-					collection: {
-						connectOrCreate: {
-							where: {
-								contractAddress: nftData.contractAddress,
-							},
-							create: {
-								contractAddress: nftData.contractAddress,
-								name: nftData.collectionName,
-							}
-						}
-					}
+          manifoldBuyNowListing: listingType === 2 ? listingData : undefined,
+          manifoldAuctionListing: listingType === 1 ? listingData : undefined,
+          collection: {
+            connectOrCreate: {
+              where: {
+                contractAddress: nftData.contractAddress,
+              },
+              create: {
+                contractAddress: nftData.contractAddress,
+                name: nftData.collectionName,
+              },
+            },
+          },
         },
-				select: {
-					id: true
-				},
+        select: {
+          id: true,
+        },
       });
     } catch (e: any) {
       throw new Error(e);
@@ -78,9 +104,6 @@ export async function addNftToUser(ethAddress: string, nftData: FullNft) {
       nfts: true,
     },
   });
-	console.log({
-		nft, userWithNft
-	})
   return userWithNft;
 }
 

@@ -210,7 +210,6 @@ export async function updateNftCuratorComment(
     },
     data: { curatorComment: note },
   });
-  console.log({ updatedCuration });
   return updatedCuration;
 }
 

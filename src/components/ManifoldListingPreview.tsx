@@ -25,7 +25,7 @@ export default async function ManifoldListingPreview({
 
   useEffect(() => {
     const contractAddress = _.get(listingData, "token.address_");
-    const tokenIdInt = parseInt(_.get(listingData, "token.id.hex", -1));
+    const tokenIdInt = parseInt(_.get(listingData, "token.id.hex", "-1"));
     const tokenId = tokenIdInt !== -1 ? tokenIdInt.toString() : undefined;
     if (contractAddress && tokenId) {
       setNftId({ contractAddress, tokenId });

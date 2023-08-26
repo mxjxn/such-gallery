@@ -87,7 +87,7 @@ export async function addNewNftToCuratedList(
 						create: {
 							seller: nftData.seller || "",
 							listingId: nftData.listingId,
-							finalized: nftData.finalized,
+							finalized: nftData.finalized || false, // TODO fix the type
 						}
 					}
 				}

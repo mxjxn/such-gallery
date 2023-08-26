@@ -3,14 +3,14 @@ import { useProfile } from "@/hooks/useProfile";
 import { Prisma } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { AddToList, CurateWithoutSaving  } from "./NftCards";
+import { AddToList, CurateWithoutSaving } from "./NftCards";
 import { FullNft, FullNftWithListing } from "@/types/types";
 
 export default function NftActions({
   nft,
   onSave,
 }: {
-  nft: FullNft | FullNftWithListing;
+  nft: FullNftWithListing;
   onSave: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -35,8 +35,7 @@ export default function NftActions({
       >
         Save
       </button>
-			<CurateWithoutSaving nft={nft} />
-			
+      <CurateWithoutSaving nft={nft} />
     </div>
   );
 }

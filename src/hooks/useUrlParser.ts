@@ -22,7 +22,7 @@ function useUrlParser(url: string): UrlParserReturn {
     if (url) {
       const parsedUrl = parseUrl(url);
       const parsedHandler = handler(url);
-      if (parsedUrl && parsedHandler) {
+      if (parsedUrl?.tokenId && parsedUrl.contractAddress && parsedHandler) {
         if (parsedHandler === "manifoldListing") {
           setParsedResult({ handlerName: parsedHandler, params: Number(parsedUrl) });
         } else if (parsedHandler === "zora" && parsedUrl) {

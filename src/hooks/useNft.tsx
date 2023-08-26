@@ -1,5 +1,5 @@
 import { endpoint, networks } from "@/utils/zora";
-import { FullNft, NftId } from "@/types/types";
+import { FullNft, FullNftWithListing, NftId } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { ZDK } from "@zoralabs/zdk";
 import {
@@ -15,7 +15,10 @@ const zdk = new ZDK({ networks, endpoint });
 async function getNft(
   nft: NftId,
   includeFullDetails: boolean
-): Promise<TokenQuery> {
+): Promise<TokenQuery|null> {
+	if(!nft?.contractAddress || !nft?.tokenId) {
+		return null;
+	}
   return await zdk.sdk.token({
     network: networks[0],
     token: {
@@ -47,7 +50,7 @@ async function getCollectionName({
 }
 
 type UseNftReturn = {
-  data: Partial<FullNft> | undefined;
+  data: FullNftWithListing | undefined;
   isLoading: boolean;
   isError: boolean;
 };
@@ -85,8 +88,8 @@ export function useNft(nft: NftId | null, opts?:UseNftOptions): UseNftReturn {
   );
   return {
     data: !!nft && data ? {
-      contractAddress: nft.contractAddress,
-      tokenId: nft?.tokenId || "-1",
+      contractAddress: String(nft.contractAddress),
+      tokenId: String(nft.tokenId),
       title: _.get(data, "token.token.name", ""),
       imageURI: _.get(data, "token.token.image.url", ""),
       metadataURI: _.get(data, "token.token.tokenUrl", ""),

@@ -41,7 +41,7 @@ export async function addNftToUser(
     let listingData: any,
 		    listingType: number = 0; // 0 is no listing, 1 is buynow, 2 is auction
     if ("listingId" in nftData) {
-			listingType = nftData.listingType;
+			listingType = nftData.listingType || 0;
       listingData = {
         connectOrCreate: {
           where: {

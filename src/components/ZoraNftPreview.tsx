@@ -12,7 +12,7 @@ export default async function ZoraNftPreview(
 		onSave,
 	}: {
 		nft: NftId;
-		onSave?: () => void;
+		onSave: () => void;
 	}
 ) {
   const { data, isError } = useNft(nft);

@@ -15,7 +15,7 @@ import {
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
 import { Prisma } from "@prisma/client";
-import { FullNft } from "@/types/types";
+import { FullNft, FullNftWithListing } from "@/types/types";
 
 const imageSizes = { xs: 30, sm: 60, md: 120, lg: 240, xl: 480, "2xl": 960 };
 
@@ -110,7 +110,7 @@ const NftCard = ({
 export const CurateWithoutSaving = ({
   nft,
 }: {
-  nft: FullNft;
+  nft: FullNft | FullNftWithListing;
 }) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();

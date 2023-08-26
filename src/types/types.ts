@@ -40,9 +40,9 @@ export type FullNft = {
 };
 
 export type FullNftWithListing = FullNft & {
-	listingId: number;
-	seller: string;
-	finalized: boolean;
+	listingId?: number;
+	seller?: string;
+	finalized?: boolean;
 	totalAvailable?: number;
-	listingType: number; // 1 is buynow, 2 is auction
+	listingType?: number; // 1 is buynow, 2 is auction
 }

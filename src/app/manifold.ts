@@ -26,7 +26,7 @@ type ManifoldListingResponse = {
 	receivers: Receiver[];
 	seller: string;
 	finalized: boolean;
-	bids: Bid[] | Bid;
+	bid: Bid;
 }
 
 export async function fetchListingData(id: number): Promise<ManifoldListingResponse> {

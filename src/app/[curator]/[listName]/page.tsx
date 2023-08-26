@@ -60,14 +60,12 @@ async function getList(curator: string, slug: string) {
               description: true,
               contractAddress: true,
               tokenId: true,
+							manifoldBuyNowListing: true,
+							manifoldAuctionListing: true,
               metadataURI: true,
               imageURI: true,
               id: true,
             },
-						include: {
-							manifoldBuyNowListing: true,
-							manifoldAuctionListing: true
-						}
           },
           curatorComment: true,
           showAttributes: true,

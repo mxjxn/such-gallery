@@ -59,8 +59,21 @@ async function getList(curator: string, slug: string) {
               title: true,
               description: true,
               contractAddress: true,
-              manifoldBuyNowListing: true,
-              manifoldAuctionListing: true,
+              manifoldBuyNowListing: {
+                select: {
+                  listingId: true,
+                  seller: true,
+                  finalized: true,
+                  totalAvailable: true,
+                },
+              },
+              manifoldAuctionListing: {
+                select: {
+                  listingId: true,
+                  seller: true,
+                  finalized: true,
+                },
+              },
               tokenId: true,
               metadataURI: true,
               imageURI: true,
@@ -148,8 +161,9 @@ export default async function Page({
                   <div className="text-xl">Buy me now</div>
                 )}
                 {!!nft.manifoldAuctionListing && (
-									<ManifoldAuctionDetails listingId={nft.manifoldAuctionListing} />
-
+                  <ManifoldAuctionDetails
+                    listingId={nft.manifoldAuctionListing}
+                  />
                 )}
               </div>
             );

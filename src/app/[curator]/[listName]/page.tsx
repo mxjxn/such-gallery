@@ -59,26 +59,15 @@ async function getList(curator: string, slug: string) {
               title: true,
               description: true,
               contractAddress: true,
-              manifoldBuyNowListing: {
-                select: {
-                  listingId: true,
-                  seller: true,
-                  finalized: true,
-                  totalAvailable: true,
-                },
-              },
-              manifoldAuctionListing: {
-                select: {
-                  listingId: true,
-                  seller: true,
-                  finalized: true,
-                },
-              },
               tokenId: true,
               metadataURI: true,
               imageURI: true,
               id: true,
             },
+						include: {
+							manifoldBuyNowListing: true,
+							manifoldAuctionListing: true
+						}
           },
           curatorComment: true,
           showAttributes: true,

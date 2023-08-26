@@ -1,22 +1,19 @@
 import { comicNeue } from "@/fonts";
-import React, { useEffect } from "react";
-import { validateUrl, parseUrl } from "@/lib/validNftUrl";
-import CopyTextComponent from "@/components/CopyText";
-import LabeledField from "@/components/LabeledField";
-import NftActions from "@/components/NftActions";
+import React, { Suspense, useEffect } from "react";
 import { NftId } from "@/types/types";
-import Image from "next/image";
-import { useNft } from "@/hooks/useNft";
 import _ from "lodash";
+import useUrlParser from "@/hooks/useUrlParser";
+import { parseUrl, validateUrl } from "@/lib/validNftUrl";
+import ZoraNftPreview from "./ZoraNftPreview";
+import ManifoldListingPreview from "./ManifoldListingPreview";
 
 export default function NFTSearch() {
   // a useRef for the input field
   const inputRef = React.useRef<HTMLInputElement>(null);
   // latest valid input value
   const [inputValue, setInputValue] = React.useState("");
-  const nftInput: NftId | null = parseUrl(inputValue);
   // retrieve metadata from Zora API
-  const { data: nft, isLoading, isEnabled, isError } = useNft(nftInput);
+  const { data: parsedUrl } = useUrlParser(inputValue);
 
   const validateUrlOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (inputValue !== e.target.value && validateUrl(e.target.value)) {
@@ -33,7 +30,6 @@ export default function NFTSearch() {
           className="input w-full border-secondary focus:border-white join-item"
           placeholder="Enter NFT URL or contract-address/token-id"
         />
-
         <button
           className={`
 						join-item
@@ -53,60 +49,31 @@ export default function NFTSearch() {
           Such NFT wow
         </button>
       </div>
-      {isEnabled && isLoading && (
-        <div
-          className={`text-3xl my-5 py-2 px-2 flex  xl:flex-row-reverse xs:items-center bg-slate-800 rounded-xl justify-around `}
-        >
-          <div>Loading...</div>
-        </div>
+      {parsedUrl?.handlerName === "zora" && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ZoraNftPreview
+            nft={parsedUrl.params}
+            onSave={() => {
+              if (!_.isNull(inputRef.current)) {
+                inputRef.current.value = "";
+              }
+              setInputValue("");
+            }}
+          />
+        </Suspense>
       )}
-      {!!nft && nft.contractAddress && nft.tokenId && !isError && !!nft.imageURI && (
-        <div>
-          <div className={` my-5 py-2 px-2  bg-slate-800 rounded-xl `}>
-            <div
-              className={`flex flex-col xl:flex-row-reverse xs:items-center justify-between`}
-            >
-              <div className="p-2 w-full bg-black block-inline flex justify-around rounded-md">
-                <Image
-                  src={nft.imageURI}
-                  alt={nft.title || ""}
-                  width={256}
-                  height={256}
-                />
-              </div>
-              <div className="flex flex-col">
-                <div className="mt-3 xl:mt-0 xl:mr-3">
-                  <LabeledField inline label={"Name"}>
-                    <div className="text-lg">{nft.title}</div>
-                  </LabeledField>
-                  <LabeledField inline label={"Creator"}>
-                    {nft?.metadata?.created_by}
-                  </LabeledField>
-                  <LabeledField inline label={"Contract"} className="p-0 m-0">
-                    <CopyTextComponent
-                      text={nft.contractAddress}
-                      className="py-1"
-                    />
-                  </LabeledField>
-                  <LabeledField inline label={"Token ID"}>
-                    {nft.tokenId}
-                  </LabeledField>
-                </div>
-                <div className={`w-full`}>
-                  <NftActions
-                    nft={nft}
-                    onSave={() => {
-                      if (!_.isNull(inputRef.current)) {
-                        inputRef.current.value = "";
-                      }
-                      setInputValue("");
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {parsedUrl?.handlerName === "manifoldListing" && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ManifoldListingPreview
+						listingId={parsedUrl.params}
+            onSave={() => {
+              if (!_.isNull(inputRef.current)) {
+                inputRef.current.value = "";
+              }
+              setInputValue("");
+            }}
+					/>
+        </Suspense>
       )}
     </div>
   );

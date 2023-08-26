@@ -1,6 +1,6 @@
-export interface NftId {
-  contractAddress: string;
-  tokenId: string;
+export type NftId = {
+  contractAddress?: string;
+  tokenId?: string;
   chain?: string | number;
 }
 
@@ -19,14 +19,13 @@ export type Attribute = {
 export type Metadata = {
   name?: string;
   description?: string;
-	external_url?: string;
-	image?: string;
-	image_details?: any;
+  external_url?: string;
+  image?: string;
+  image_details?: any;
   image_url?: string;
   created_by?: string;
   attributes?: Array<Attribute & any>;
 };
-
 
 export type FullNft = {
   contractAddress: string;
@@ -40,3 +39,10 @@ export type FullNft = {
   description?: string;
 };
 
+export type FullNftWithListing = FullNft & {
+	listingId?: number;
+	seller?: string;
+	finalized?: boolean;
+	totalAvailable?: number;
+	listingType?: number; // 1 is buynow, 2 is auction
+}

@@ -1,6 +1,6 @@
 "use server";
 import prisma from "@/prisma";
-import { FullNft } from "@/types/types";
+import { FullNft, FullNftWithListing } from "@/types/types";
 import {
   CuratedCollection,
   CuratedCollectionNFT,
@@ -56,7 +56,7 @@ export async function addNftToCuratedList(
 }
 
 export async function addNewNftToCuratedList(
-  nftData: FullNft,
+  nftData: FullNftWithListing,
   listId: number
 ): Promise<CuratedCollection | null> {
   let nft, curatedCollectionNFT, resultingCollection;
@@ -72,34 +72,80 @@ export async function addNewNftToCuratedList(
   } catch (e: any) {
     console.error("Error fetching existing NFT", e);
   }
+	if (!!nft && nftData.listingId) {
+		// update listing
+		nft = await prisma.nFT.update({
+			where: {
+				id: nft.id
+			},
+			data: {
+				manifoldAuctionListing: {
+					connectOrCreate: {
+						where: {
+							listingId: nftData.listingId,
+						},
+						create: {
+							seller: nftData.seller || "",
+							listingId: nftData.listingId,
+							finalized: nftData.finalized || false, // TODO fix the type
+						}
+					}
+				}
+			},
+		})
+	}
   if (!nft) {
+    let listingData: any,
+      listingType: number = nftData.listingType || 0;
+    // 0 is no listing, 1 is buynow, 2 is auction
+
+    if ("listingId" in nftData) {
+      listingData = {
+        connectOrCreate: {
+          where: {
+            listingId: nftData.listingId,
+          },
+          create: {
+            listingId: nftData.listingId,
+            seller: nftData.seller,
+            finalized: nftData.finalized,
+          },
+        },
+      };
+      if (nftData.totalAvailable) {
+        listingData.connectOrCreate.create.totalAvailable =
+          nftData.totalAvailable;
+      }
+    }
     try {
       nft = await prisma.nFT.create({
         data: {
-					title: nftData.title,
-					metadataURI: nftData.metadataURI,
-					tokenId: nftData.tokenId,
-					imageURI: nftData.imageURI || "",
-					description: nftData.description,
-					collection: {
-						connectOrCreate: {
-							where: {
-									contractAddress: nftData.contractAddress,
-								},
-								create: {
-									contractAddress: nftData.contractAddress,
-									name: nftData.collectionName
-								}
-						}
-					},
-				},
-				select: {
-					id: true
-				}
+          title: nftData.title,
+          metadataURI: nftData.metadataURI,
+          tokenId: nftData.tokenId,
+          imageURI: nftData.imageURI || "",
+          description: nftData.description,
+          manifoldBuyNowListing: listingType === 2 ? listingData : undefined,
+          manifoldAuctionListing: listingType === 1 ? listingData : undefined,
+          collection: {
+            connectOrCreate: {
+              where: {
+                contractAddress: nftData.contractAddress,
+              },
+              create: {
+                contractAddress: nftData.contractAddress,
+                name: nftData.collectionName,
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+        },
       });
     } catch (e: any) {
       console.error("Error saving NFT to server", e);
-			throw new Error(e)
+      throw new Error(e);
     }
   }
   if (!_.isEmpty(nft)) {
@@ -210,7 +256,6 @@ export async function updateNftCuratorComment(
     },
     data: { curatorComment: note },
   });
-  console.log({ updatedCuration });
   return updatedCuration;
 }
 

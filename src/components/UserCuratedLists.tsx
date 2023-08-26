@@ -36,7 +36,6 @@ export default function UserCuratedLists() {
       list: CuratedCollectionId;
       title: string;
     }) => {
-      console.log({ list });
       return updateCuratedListTitle(
         {
           slug: list.slug,

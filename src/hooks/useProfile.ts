@@ -75,14 +75,7 @@ export function useProfile(): UseProfileReturn {
       };
       updateUser();
     }
-		console.log({
-isConnected, address, ensData, userAddress, userEnsName, isLoadingEns, ensError,isEnsError
-		})
   }, [isConnected, address, ensData, userAddress, userEnsName, isLoadingEns, ensError,isEnsError]);
-
-  //	const updatedUser = await updateNameAndBio(address, nameValue, bioValue);
-  //useEffect(() => {
-  //}, [ensData]);
 
   return {
     connect: () => !!openConnectModal && openConnectModal(),

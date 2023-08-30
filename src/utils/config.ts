@@ -1,5 +1,3 @@
-"use server";
-
 import {
   mainnet,
   sepolia,
@@ -10,7 +8,7 @@ import {
 
 export const SITE_NAME = "Such Gallery";
 export const SITE_DESCRIPTION = "a community-curated gallery for NFTs";
-export const SITE_URL = "https://suchgallery.vercel.app";
+export const SITE_URL = process.env.WEBSITE_URI || "http://localhost:3000";
 
 export const SOCIAL_TWITTER = "mxjxn";
 export const SOCIAL_FARCASTER = "mxjxn";

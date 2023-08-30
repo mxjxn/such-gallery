@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import _ from "lodash";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  deleteNftFromUser,
   getNftsByUser,
   removeNftFromUser,
 } from "@/app/nfts";
@@ -19,14 +18,12 @@ export default function UserNftList({ address }: { address: string }) {
   const { mutate: deleteNft } = useMutation({
     mutationFn: ({
       ethAddress,
-      contractAddress,
-      tokenId,
+      nftId
     }: {
       ethAddress: string;
-      contractAddress: string;
-      tokenId: string;
+      nftId: number;
     }) => {
-      return removeNftFromUser(ethAddress, contractAddress, tokenId);
+      return removeNftFromUser(ethAddress, nftId);
     },
     onSuccess: (a: any) => {
       queryClient.invalidateQueries({ queryKey: ["userNfts", address] });
@@ -42,6 +39,11 @@ export default function UserNftList({ address }: { address: string }) {
   });
   const [cardView, setCardView] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(-1);
+
+	useEffect(() => {
+		console.log({userNftListData: data})
+	}, [data])
+
   return (
     <div>
       {!_.isEmpty(data) && (
@@ -72,8 +74,8 @@ export default function UserNftList({ address }: { address: string }) {
           <div className=" rounded-2xl border-4 border-slate-800 mb-4">
             {!cardView ? (
               <div className="w-full flex flex-col justify-stretch flex-wrap gap-1 items-stretch p-2">
-                {!!data &&
-                  data.map((nft, i) => (
+                {!!data.nfts &&
+                  data.nfts.map((nft, i) => (
                     <NftListItem
                       key={`${nft?.title}_${Math.floor(
                         Math.random() * Math.pow(2, 11)
@@ -96,8 +98,7 @@ export default function UserNftList({ address }: { address: string }) {
                       onDelete={async () =>
                         deleteNft({
                           ethAddress: address,
-                          contractAddress: nft.contractAddress,
-                          tokenId: nft.tokenId,
+                          nftId: nft.id,
                         })
                       }
                     />
@@ -105,8 +106,8 @@ export default function UserNftList({ address }: { address: string }) {
               </div>
             ) : (
               <div className="w-full flex flex-row justify-around flex-wrap items-stretch">
-                {!!data &&
-                  data.map((nft) => (
+                {!!data && _.isArray(data) &&
+                  data.nfts.map((nft) => (
                     <NftCard
                       key={`${nft?.title}_${Math.floor(
                         Math.random() * Math.pow(2, 11)
@@ -117,8 +118,7 @@ export default function UserNftList({ address }: { address: string }) {
                       onDelete={async () =>
                         deleteNft({
                           ethAddress: address,
-                          contractAddress: nft.contractAddress,
-                          tokenId: nft.tokenId,
+                          nftId: nft.id,
                         })
                       }
                     />

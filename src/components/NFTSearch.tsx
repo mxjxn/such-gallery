@@ -57,7 +57,6 @@ export default function NFTSearch() {
         </button>
 				</form>
       </div>
-			<div>parsed url is {parsedUrl?.handlerName}</div>
       {parsedUrl?.handlerName === "zora" && (
         <Suspense fallback={<div>Loading...</div>}>
           <ZoraNftPreview

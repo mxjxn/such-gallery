@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (user?.nfts) {
-    return NextResponse.json({ nfts: user?.nfts });
+    return NextResponse.json(user?.nfts);
   }
-  return NextResponse.json({ nfts: [] });
+  return NextResponse.json([]);
 }

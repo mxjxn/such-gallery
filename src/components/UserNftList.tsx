@@ -9,10 +9,12 @@ import {
 import Image from "next/image";
 import { NftCard, NftListItem } from "./NftCards";
 import { addNftToCuratedList } from "@/app/curated";
+import { FullNftWithListing } from "@/types/types";
+import {NFT} from "@prisma/client";
 
 export default function UserNftList({ address }: { address: string }) {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery(["userNfts", address], async () =>
+  const { data } = useQuery<NFT[]>(["userNfts", address], async () =>
     getNftsByUser(address)
   );
   const { mutate: deleteNft } = useMutation({
@@ -39,10 +41,6 @@ export default function UserNftList({ address }: { address: string }) {
   });
   const [cardView, setCardView] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(-1);
-
-	useEffect(() => {
-		console.log({userNftListData: data})
-	}, [data])
 
   return (
     <div>
@@ -74,8 +72,8 @@ export default function UserNftList({ address }: { address: string }) {
           <div className=" rounded-2xl border-4 border-slate-800 mb-4">
             {!cardView ? (
               <div className="w-full flex flex-col justify-stretch flex-wrap gap-1 items-stretch p-2">
-                {!!data.nfts &&
-                  data.nfts.map((nft, i) => (
+                {!!data &&
+                  data.map((nft, i) => (
                     <NftListItem
                       key={`${nft?.title}_${Math.floor(
                         Math.random() * Math.pow(2, 11)
@@ -106,8 +104,8 @@ export default function UserNftList({ address }: { address: string }) {
               </div>
             ) : (
               <div className="w-full flex flex-row justify-around flex-wrap items-stretch">
-                {!!data && _.isArray(data) &&
-                  data.nfts.map((nft) => (
+                {!_.isEmpty(data) && _.isArray(data) &&
+                  data.map((nft) => (
                     <NftCard
                       key={`${nft?.title}_${Math.floor(
                         Math.random() * Math.pow(2, 11)

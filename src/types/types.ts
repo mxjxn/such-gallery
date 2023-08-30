@@ -44,5 +44,5 @@ export type FullNftWithListing = FullNft & {
 	seller?: string;
 	finalized?: boolean;
 	totalAvailable?: number;
-	listingType?: number; // 1 is buynow, 2 is auction
+	listingType?: number; // 2 is buynow, 1 is auction
 }

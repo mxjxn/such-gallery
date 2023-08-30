@@ -101,6 +101,7 @@ export default async function ManifoldListingPreview({
 												seller: _.get(listingData, "seller"),
 												listingType: _.get(listingData, "details.type_"),
 												finalized: _.get(listingData, "finalized"),
+												totalAvailable: _.get(listingData, "details.totalAvailable"),
 												listingId: listingId,
 											}}
 											onSave={onSave}

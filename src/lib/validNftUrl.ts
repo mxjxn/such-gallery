@@ -1,9 +1,16 @@
 import { NftId } from "@/types/types";
 
+export type NftHandlerName = "zora" | "manifoldListing";
+export type ZoraParams = { contractAddress: string; tokenId: string };
+export type ZoraHandler = { handlerName: "zora"; params: ZoraParams };
+
+export type ManifoldListingParams = number;
+export type ManifoldListingHandler = { handlerName: "manifoldListing"; params: ManifoldListingParams }
+
 interface IUrlParser {
   validate: (url: string) => boolean;
   parse: (url: string) => any;
-  handle: string;
+  handle: NftHandlerName;
 }
 
 // Generic function to create a validator and a parser
@@ -12,7 +19,7 @@ function createNftIdParser(
   chain: string,
   contractIdx: number,
   tokenIdIdx: number,
-  handler: string,
+  handler: NftHandlerName,
 ): IUrlParser {
   return {
 		handle: handler,
@@ -33,7 +40,7 @@ function createNftIdParser(
 function createListingIdParser(
   regex: RegExp,
   listingIdIdx: number,
-  handler: string,
+  handler: NftHandlerName,
 ):IUrlParser {
 	return {
 		handle: handler,
@@ -100,7 +107,7 @@ export function parseUrl(url: string): NftId | null {
   return parser ? parser.parse(url) : null;
 }
 
-export function handler(url: string):string {
+export function handler(url: string):NftHandlerName {
   const parser = urlParsers.find(parser => parser.validate(url));
   if (parser) {
     const id = parser.parse(url);

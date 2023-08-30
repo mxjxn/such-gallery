@@ -1,6 +1,8 @@
 "use server";
 import prisma from "@/prisma";
 import { FullNft, FullNftWithListing } from "@/types/types";
+import { SITE_URL } from "@/utils/config";
+import { convertToKebabCase } from "@/utils/strings";
 import {
   CuratedCollection,
   CuratedCollectionNFT,
@@ -8,170 +10,46 @@ import {
 } from "@prisma/client";
 import _ from "lodash";
 
-function convertToKebabCase(str: string): string {
-  // Convert to lowercase and replace unwanted characters and spaces with hyphens
-  let result = str.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
-  // Remove leading or trailing hyphens
-  result = result.replace(/^-|-$/g, "");
-
-  // Limit to 5 words
-  let words = result.split("-");
-  if (words.length > 5) {
-    result = words.slice(0, 5).join("-");
-  }
-
-  return result;
-}
-
 export async function createCuratedList(
   userId: number,
   title: string = "untitled"
-): Promise<CuratedCollection | null> {
-  const curatedList = await prisma.curatedCollection.create({
-    data: {
-      curatorId: userId,
-      title: title,
-      slug: convertToKebabCase(title),
-    },
-  });
-
-  return curatedList;
+) {
+  return await fetch(`${SITE_URL}/api/createList`, {
+		method: "POST",
+		body: JSON.stringify({ userId, title })
+	})
 }
 
 export async function addNftToCuratedList(
   nftId: number,
   listId: number
-): Promise<CuratedCollection | null> {
-  const curatedCollectionNFT = await prisma.curatedCollectionNFT.create({
-    data: {
-      curatedCollectionId: listId,
-      nftId: nftId,
-    },
-  });
-  return await prisma.curatedCollection.findUnique({
-    where: { id: curatedCollectionNFT.curatedCollectionId },
-    include: { nfts: true },
-  });
+){
+	return await fetch(`${SITE_URL}/api/addToList`, {
+		method: "POST",
+		body: JSON.stringify({ nftId, listId })
+	})
 }
 
 export async function addNewNftToCuratedList(
   nftData: FullNftWithListing,
   listId: number
-): Promise<CuratedCollection | null> {
-  let nft, curatedCollectionNFT, resultingCollection;
-  try {
-    nft = await prisma.nFT.findUnique({
-      where: {
-        contractAddress_tokenId: {
-          contractAddress: nftData.contractAddress,
-          tokenId: String(nftData.tokenId),
-        },
-      },
-    });
-  } catch (e: any) {
-    console.error("Error fetching existing NFT", e);
-  }
-	if (!!nft && nftData.listingId) {
-		// update listing
-		nft = await prisma.nFT.update({
-			where: {
-				id: nft.id
-			},
-			data: {
-				manifoldAuctionListing: {
-					connectOrCreate: {
-						where: {
-							listingId: nftData.listingId,
-						},
-						create: {
-							seller: nftData.seller || "",
-							listingId: nftData.listingId,
-							finalized: nftData.finalized || false, // TODO fix the type
-						}
-					}
-				}
-			},
-		})
+) {
+	let nft = await fetch(`${SITE_URL}/api/submitNft`, {
+		method: "POST",
+		body: JSON.stringify({ nftData })
+	})
+	const nftResult = await nft.json();
+	console.log(" about to do some shit ", nftResult)
+	let curatedList;
+	if(nftResult?.id) {
+		curatedList = await fetch(`${SITE_URL}/api/addToList`, {
+			method: "POST",
+			body: JSON.stringify({ nftId: nftResult.id, listId })
+		});
 	}
-  if (!nft) {
-    let listingData: any,
-      listingType: number = nftData.listingType || 0;
-    // 0 is no listing, 1 is buynow, 2 is auction
-
-    if ("listingId" in nftData) {
-      listingData = {
-        connectOrCreate: {
-          where: {
-            listingId: nftData.listingId,
-          },
-          create: {
-            listingId: nftData.listingId,
-            seller: nftData.seller,
-            finalized: nftData.finalized,
-          },
-        },
-      };
-      if (nftData.totalAvailable) {
-        listingData.connectOrCreate.create.totalAvailable =
-          nftData.totalAvailable;
-      }
-    }
-    try {
-      nft = await prisma.nFT.create({
-        data: {
-          title: nftData.title,
-          metadataURI: nftData.metadataURI,
-          tokenId: nftData.tokenId,
-          imageURI: nftData.imageURI || "",
-          description: nftData.description,
-          manifoldBuyNowListing: listingType === 2 ? listingData : undefined,
-          manifoldAuctionListing: listingType === 1 ? listingData : undefined,
-          collection: {
-            connectOrCreate: {
-              where: {
-                contractAddress: nftData.contractAddress,
-              },
-              create: {
-                contractAddress: nftData.contractAddress,
-                name: nftData.collectionName,
-              },
-            },
-          },
-        },
-        select: {
-          id: true,
-        },
-      });
-    } catch (e: any) {
-      console.error("Error saving NFT to server", e);
-      throw new Error(e);
-    }
-  }
-  if (!_.isEmpty(nft)) {
-    try {
-      curatedCollectionNFT = await prisma.curatedCollectionNFT.create({
-        data: {
-          curatedCollectionId: listId,
-          nftId: nft.id,
-        },
-      });
-    } catch (e: any) {
-      console.error("Error saving curatedCollectionNFT to server", e);
-    }
-  }
-  if (!_.isEmpty(curatedCollectionNFT)) {
-    try {
-      resultingCollection = prisma.curatedCollection.findUnique({
-        where: { id: curatedCollectionNFT.curatedCollectionId },
-        include: { nfts: true },
-      });
-    } catch (e: any) {
-      console.error("Error fetching finalized curatedCollection", e);
-    }
-  }
-  return resultingCollection || null;
+	return curatedList?.json();
 }
+
 
 export async function getUserCuratedLists(
   userId: number

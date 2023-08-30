@@ -1,8 +1,9 @@
+"use client"
 import { comicNeue } from "@/fonts";
 import React, { Suspense, useEffect } from "react";
 import { NftId } from "@/types/types";
 import _ from "lodash";
-import useUrlParser from "@/hooks/useUrlParser";
+import urlParser, { UrlParserResult } from "@/hooks/useUrlParser";
 import { parseUrl, validateUrl } from "@/lib/validNftUrl";
 import ZoraNftPreview from "./ZoraNftPreview";
 import ManifoldListingPreview from "./ManifoldListingPreview";
@@ -12,8 +13,13 @@ export default function NFTSearch() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   // latest valid input value
   const [inputValue, setInputValue] = React.useState("");
-  // retrieve metadata from Zora API
-  const { data: parsedUrl } = useUrlParser(inputValue);
+	const [parsedUrl, setParsedUrl] = React.useState<UrlParserResult>(null);
+	
+	useEffect(() => {
+		const parsed = urlParser(inputValue);
+		setParsedUrl(parsed);
+		console.log(parsed);
+	}, [inputValue])
 
   const validateUrlOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (inputValue !== e.target.value && validateUrl(e.target.value)) {
@@ -24,6 +30,7 @@ export default function NFTSearch() {
   return (
     <div>
       <div className="w-full join group">
+				<form>
         <input
           ref={inputRef}
           onChange={validateUrlOnChange}
@@ -48,7 +55,9 @@ export default function NFTSearch() {
         >
           Such NFT wow
         </button>
+				</form>
       </div>
+			<div>parsed url is {parsedUrl?.handlerName}</div>
       {parsedUrl?.handlerName === "zora" && (
         <Suspense fallback={<div>Loading...</div>}>
           <ZoraNftPreview
@@ -65,14 +74,14 @@ export default function NFTSearch() {
       {parsedUrl?.handlerName === "manifoldListing" && (
         <Suspense fallback={<div>Loading...</div>}>
           <ManifoldListingPreview
-						listingId={parsedUrl.params}
+            listingId={parsedUrl.params}
             onSave={() => {
               if (!_.isNull(inputRef.current)) {
                 inputRef.current.value = "";
               }
               setInputValue("");
             }}
-					/>
+          />
         </Suspense>
       )}
     </div>

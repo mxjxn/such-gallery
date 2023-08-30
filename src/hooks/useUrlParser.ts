@@ -1,46 +1,41 @@
 import { useEffect, useState } from "react";
-import { validateUrl, parseUrl, handler } from "@/lib/validNftUrl";
+import {
+  validateUrl,
+  parseUrl,
+  handler,
+  ZoraHandler,
+  ManifoldListingHandler,
+} from "@/lib/validNftUrl";
 
-export type ZoraParams = { contractAddress: string; tokenId: string };
-export type ManifoldParams = number;
+export type UrlParserResult = ManifoldListingHandler | ZoraHandler | null;
 
-export type ParsedUrlResult =
-  | { handlerName: "zora"; params: ZoraParams }
-  | { handlerName: "manifoldListing"; params: ManifoldParams };
-
-
-type UrlParserReturn = {
-	data: ParsedUrlResult | null;
-};
-
-function useUrlParser(url: string): UrlParserReturn {
-  const [parsedResult, setParsedResult] = useState<ParsedUrlResult | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (url) {
-      const parsedUrl = parseUrl(url);
-      const parsedHandler = handler(url);
-      if (parsedUrl?.tokenId && parsedUrl.contractAddress && parsedHandler) {
-        if (parsedHandler === "manifoldListing") {
-          setParsedResult({ handlerName: parsedHandler, params: Number(parsedUrl) });
-        } else if (parsedHandler === "zora" && parsedUrl) {
-          setParsedResult({
-            handlerName: parsedHandler,
-            params: {
-              contractAddress: parsedUrl.contractAddress,
-              tokenId: parsedUrl.tokenId,
-            },
-          });
-        }
-      }
+function urlParser(url: string): UrlParserResult {
+  let data: UrlParserResult = null;
+  console.log("url", url);
+  if (url) {
+    const parsedUrl = parseUrl(url);
+    console.log({ parsedUrl });
+    const parsedHandler = handler(url);
+    console.log({ parsedUrl });
+    if (
+      parsedUrl?.tokenId &&
+      parsedUrl.contractAddress &&
+      parsedHandler &&
+      parsedHandler === "zora"
+    ) {
+      data = {
+        handlerName: parsedHandler,
+        params: {
+          contractAddress: parsedUrl.contractAddress,
+          tokenId: parsedUrl.tokenId,
+        },
+      };
+    } else if (parsedHandler === "manifoldListing") {
+      data = { handlerName: parsedHandler, params: Number(parsedUrl) };
     }
-  }, [url]);
+  }
 
-  return {
-		data: parsedResult,
-	}
+  return data;
 }
 
-export default useUrlParser;
+export default urlParser;

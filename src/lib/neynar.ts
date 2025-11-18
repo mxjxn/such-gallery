@@ -67,3 +67,31 @@ export async function sendNeynarMiniAppNotification({
   }
 }
 
+/**
+ * Get user's verified Ethereum address from FID
+ */
+export async function getUserEthAddress(fid: number): Promise<string | null> {
+  try {
+    const user = await getNeynarUser(fid);
+    if (!user) {
+      return null;
+    }
+
+    // Get primary verified address
+    const verifiedAddress = user.verified_addresses?.primary?.eth_address;
+    if (verifiedAddress) {
+      return verifiedAddress.toLowerCase();
+    }
+
+    // Fallback to custody address if no verified address
+    if (user.custody_address) {
+      return user.custody_address.toLowerCase();
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user ETH address:', error);
+    return null;
+  }
+}
+

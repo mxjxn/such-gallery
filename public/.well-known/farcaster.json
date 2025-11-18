@@ -1,0 +1,14 @@
+{
+  "miniapp": {
+    "version": "1.0.0",
+    "name": "such.gallery",
+    "homeUrl": "https://such.gallery",
+    "iconUrl": "https://such.gallery/icon.png",
+    "splashImageUrl": "https://such.gallery/splash.png",
+    "splashBackgroundColor": "#f7f7f7",
+    "buttonText": "Browse Collections",
+    "primaryCategory": "art-creativity",
+    "tags": ["nft", "curation", "art", "gallery"]
+  }
+}
+

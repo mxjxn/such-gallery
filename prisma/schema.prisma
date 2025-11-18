@@ -1,0 +1,87 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id                 Int                 @id @default(autoincrement())
+  ethAddress         String              @unique
+  ensName            String?             @unique
+  farcasterHandle    String?             @unique
+  name               String?
+  bio                String?
+  curatedCollections CuratedCollection[]
+  nfts               NFT[]
+}
+
+model NFTCollection {
+  contractAddress String  @id
+  name            String?
+  nfts            NFT[]
+}
+
+model ManifoldBuyNowListing {
+  listingId            Int                    @unique
+  seller               String
+  finalized            Boolean
+  totalAvailable       Int
+  NFT NFT?
+}
+
+model ManifoldAuctionListing {
+  listingId            Int                    @unique
+  seller               String
+  finalized            Boolean
+  NFT NFT?
+}
+
+model NFT {
+  id                 Int                    @id @default(autoincrement())
+  collection         NFTCollection          @relation(fields: [contractAddress], references: [contractAddress])
+  contractAddress    String
+  tokenId            String
+  metadataURI        String
+  imageURI           String
+  title              String
+  description        String?                @db.Text
+  ownerOf            User?                  @relation(fields: [ownerId], references: [id])
+  ownerId            Int?
+  manifoldAuctionListing ManifoldAuctionListing? @relation(fields: [auctionListingId], references: [listingId])
+  manifoldBuyNowListing  ManifoldBuyNowListing?  @relation(fields: [buyNowListingId], references: [listingId])
+  auctionListingId       Int? @unique
+  buyNowListingId        Int? @unique
+  curatedCollections CuratedCollectionNFT[]
+
+  @@unique([contractAddress, tokenId])
+}
+
+model CuratedCollection {
+  id          Int                    @id @default(autoincrement())
+  curator     User                   @relation(fields: [curatorId], references: [id])
+  curatorId   Int
+  title       String?
+  slug        String?
+  isPublished Boolean                @default(false)
+  description String?
+  nfts        CuratedCollectionNFT[]
+
+  @@unique([curatorId, slug])
+}
+
+model CuratedCollectionNFT {
+  curatedCollection      CuratedCollection       @relation(fields: [curatedCollectionId], references: [id])
+  curatedCollectionId    Int
+  curatorComment         String?
+  showDescription        Boolean                 @default(false)
+  showAttributes         Boolean                 @default(false)
+  nft                    NFT                     @relation(fields: [nftId], references: [id])
+  nftId                  Int
+
+  @@id([curatedCollectionId, nftId])
+}

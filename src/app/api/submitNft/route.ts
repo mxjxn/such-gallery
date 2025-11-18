@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
     totalAvailable?: number;
   };
   let listingTypeObj: {
-    manifoldBuyNowListing?: any;
-    manifoldAuctionListing?: any;
+    auctionhouseBuyNowListing?: any;
+    auctionhouseAuctionListing?: any;
   } = {};
   const queryObj = {
     connectOrCreate: {
@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
     if (nftData.listingType == 2) {
       listingObj.totalAvailable = nftData.totalAvailable || 0;
       queryObj.connectOrCreate.create = listingObj;
-      listingTypeObj.manifoldBuyNowListing = queryObj;
+      listingTypeObj.auctionhouseBuyNowListing = queryObj;
     } else if (nftData.listingType == 1) {
       queryObj.connectOrCreate.create = listingObj;
-      listingTypeObj.manifoldAuctionListing = queryObj;
+      listingTypeObj.auctionhouseAuctionListing = queryObj;
     }
   }
   const nft = await prisma.nFT.create({
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
       imageURI: nftData.imageURI || "",
       title: nftData.title,
       description: nftData.description || "",
-      manifoldBuyNowListing: listingTypeObj.manifoldBuyNowListing,
-      manifoldAuctionListing: listingTypeObj.manifoldAuctionListing,
+      auctionhouseBuyNowListing: listingTypeObj.auctionhouseBuyNowListing,
+      auctionhouseAuctionListing: listingTypeObj.auctionhouseAuctionListing,
     },
 		select: {
 			id: true

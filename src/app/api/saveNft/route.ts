@@ -68,16 +68,16 @@ export async function POST(request: NextRequest) {
       },
     };
     let listingTypeObj: {
-      manifoldBuyNowListing?: any;
-      manifoldAuctionListing?: any;
+      auctionhouseBuyNowListing?: any;
+      auctionhouseAuctionListing?: any;
     } = {};
     if (nftData.listingType == 1) {
       queryObj.connectOrCreate.create = listingObj;
-      listingTypeObj.manifoldAuctionListing = queryObj;
+      listingTypeObj.auctionhouseAuctionListing = queryObj;
     } else if (nftData.listingType == 2) {
       listingObj.totalAvailable = nftData.totalAvailable || 0;
       queryObj.connectOrCreate.create = listingObj;
-      listingTypeObj.manifoldBuyNowListing = queryObj;
+      listingTypeObj.auctionhouseBuyNowListing = queryObj;
     }
 
     const nft = await prisma.nFT.update({

@@ -26,7 +26,7 @@ model NFTCollection {
   nfts            NFT[]
 }
 
-model ManifoldBuyNowListing {
+model AuctionhouseBuyNowListing {
   listingId            Int                    @unique
   seller               String
   finalized            Boolean
@@ -34,7 +34,7 @@ model ManifoldBuyNowListing {
   NFT NFT?
 }
 
-model ManifoldAuctionListing {
+model AuctionhouseAuctionListing {
   listingId            Int                    @unique
   seller               String
   finalized            Boolean
@@ -52,8 +52,8 @@ model NFT {
   description        String?                @db.Text
   ownerOf            User?                  @relation(fields: [ownerId], references: [id])
   ownerId            Int?
-  manifoldAuctionListing ManifoldAuctionListing? @relation(fields: [auctionListingId], references: [listingId])
-  manifoldBuyNowListing  ManifoldBuyNowListing?  @relation(fields: [buyNowListingId], references: [listingId])
+  auctionhouseAuctionListing AuctionhouseAuctionListing? @relation(fields: [auctionListingId], references: [listingId])
+  auctionhouseBuyNowListing  AuctionhouseBuyNowListing?  @relation(fields: [buyNowListingId], references: [listingId])
   auctionListingId       Int? @unique
   buyNowListingId        Int? @unique
   curatedCollections CuratedCollectionNFT[]

@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { curatorFid, castHash, targetType, targetCollectionId, targetContractAddress, targetTokenId, referralAddress } = body;
+    const { curatorFid, castHash, targetType, targetGalleryId, targetContractAddress, targetTokenId, referralAddress } = body;
 
     if (!curatorFid || !castHash || !targetType || !referralAddress) {
       return NextResponse.json(
@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (targetType === 'collection' && !targetCollectionId) {
+    if (targetType === 'gallery' && !targetGalleryId) {
       return NextResponse.json(
-        { success: false, error: 'targetCollectionId required for collection type' },
+        { success: false, error: 'targetGalleryId required for gallery type' },
         { status: 400 }
       );
     }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         curatorFid,
         castHash,
         targetType,
-        targetCollectionId: targetCollectionId || null,
+        targetGalleryId: targetGalleryId || null,
         targetContractAddress: targetContractAddress ? targetContractAddress.toLowerCase() : null,
         targetTokenId: targetTokenId || null,
         referralAddress: referralAddress.toLowerCase(),
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         curatorFid: newQuoteCast.curatorFid,
         castHash: newQuoteCast.castHash,
         targetType: newQuoteCast.targetType,
-        targetCollectionId: newQuoteCast.targetCollectionId,
+        targetGalleryId: newQuoteCast.targetGalleryId,
         targetContractAddress: newQuoteCast.targetContractAddress,
         targetTokenId: newQuoteCast.targetTokenId,
         referralAddress: newQuoteCast.referralAddress,
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const curatorFid = searchParams.get('curatorFid');
-    const targetCollectionId = searchParams.get('targetCollectionId');
+    const targetGalleryId = searchParams.get('targetGalleryId');
     const targetContractAddress = searchParams.get('targetContractAddress');
     const targetTokenId = searchParams.get('targetTokenId');
 
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         curatorFid: qc.curatorFid,
         castHash: qc.castHash,
         targetType: qc.targetType,
-        targetCollectionId: qc.targetCollectionId,
+        targetGalleryId: qc.targetGalleryId,
         targetContractAddress: qc.targetContractAddress,
         targetTokenId: qc.targetTokenId,
         referralAddress: qc.referralAddress,

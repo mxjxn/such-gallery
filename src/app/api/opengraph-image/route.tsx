@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { getDatabase, curatedCollections, curatedCollectionNfts, nftMetadataCache } from '~/lib/db';
+import { getDatabase, curatedGalleries, curatedGalleryNfts, nftMetadataCache } from '~/lib/db';
 import { eq } from 'drizzle-orm';
 import { getNeynarUser } from '~/lib/neynar';
 import { getNFTMetadata } from '~/lib/alchemy';
@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
       const collectionIdNum = parseInt(collectionId);
       const [collection] = await db
         .select()
-        .from(curatedCollections)
-        .where(eq(curatedCollections.id, collectionIdNum))
+        .from(curatedGalleries)
+        .where(eq(curatedGalleries.id, collectionIdNum))
         .limit(1);
 
       if (!collection) {
@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
       // Get first NFT in collection
       const [firstNft] = await db
         .select()
-        .from(curatedCollectionNfts)
-        .where(eq(curatedCollectionNfts.curatedCollectionId, collectionIdNum))
+        .from(curatedGalleryNfts)
+        .where(eq(curatedGalleryNfts.curatedGalleryId, collectionIdNum))
         .limit(1);
 
       let nftImage: string | null = null;
@@ -160,9 +160,9 @@ export async function GET(request: NextRequest) {
       // Get collection info if available
       const [collectionNft] = await db
         .select()
-        .from(curatedCollectionNfts)
+        .from(curatedGalleryNfts)
         .where(
-          eq(curatedCollectionNfts.contractAddress, normalizedAddress)
+          eq(curatedGalleryNfts.contractAddress, normalizedAddress)
         )
         .limit(1);
 
@@ -172,8 +172,8 @@ export async function GET(request: NextRequest) {
       if (collectionNft) {
         const [collection] = await db
           .select()
-          .from(curatedCollections)
-          .where(eq(curatedCollections.id, collectionNft.curatedCollectionId))
+          .from(curatedGalleries)
+          .where(eq(curatedGalleries.id, collectionNft.curatedGalleryId))
           .limit(1);
 
         if (collection) {

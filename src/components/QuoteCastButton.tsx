@@ -63,7 +63,7 @@ export function QuoteCastButton({
           curatorFid,
           castHash: '', // Will be updated when we detect the actual cast
           targetType,
-          targetCollectionId: targetType === 'collection' ? targetId : undefined,
+          targetGalleryId: targetType === 'collection' ? targetId : undefined,
           targetContractAddress: targetType === 'nft' ? contractAddress : undefined,
           targetTokenId: targetType === 'nft' ? tokenId : undefined,
           referralAddress: address,

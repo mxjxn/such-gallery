@@ -41,14 +41,14 @@ export async function GET(request: NextRequest) {
     const db = getDatabase();
 
     if (collectionId) {
-      // Get most recent quote-cast for this collection
+      // Get most recent quote-cast for this gallery
       const [quoteCast] = await db
         .select()
         .from(quoteCasts)
         .where(
           and(
-            eq(quoteCasts.targetType, 'collection'),
-            eq(quoteCasts.targetCollectionId, parseInt(collectionId))
+            eq(quoteCasts.targetType, 'gallery'),
+            eq(quoteCasts.targetGalleryId, parseInt(collectionId))
           )
         )
         .orderBy(desc(quoteCasts.createdAt))

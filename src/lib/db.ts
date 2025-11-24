@@ -3,8 +3,8 @@ import { getDatabase } from '@repo/db';
 export { getDatabase };
 export {
   suchGalleryUsers,
-  curatedCollections,
-  curatedCollectionNfts,
+  curatedGalleries,
+  curatedGalleryNfts,
   nftMetadataCache,
   quoteCasts,
   adminUsers,

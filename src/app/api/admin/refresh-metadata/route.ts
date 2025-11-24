@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase, adminUsers, curatedCollections, curatedCollectionNfts, nftMetadataCache } from '~/lib/db';
+import { getDatabase, adminUsers, curatedGalleries, curatedGalleryNfts, nftMetadataCache } from '~/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { getNFTMetadata } from '~/lib/alchemy';
 
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
     // Get collection
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     // Get all NFTs in collection
     const nfts = await db
       .select()
-      .from(curatedCollectionNfts)
-      .where(eq(curatedCollectionNfts.curatedCollectionId, collectionId));
+      .from(curatedGalleryNfts)
+      .where(eq(curatedGalleryNfts.curatedGalleryId, collectionId));
 
     const results = [];
     const errors = [];

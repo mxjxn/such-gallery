@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase, curatedCollections, curatedCollectionNfts } from '~/lib/db';
+import { getDatabase, curatedGalleries, curatedGalleryNfts } from '~/lib/db';
 import { eq } from 'drizzle-orm';
 
 // GET /api/collections/[id] - Get a single collection with NFTs
@@ -13,8 +13,8 @@ export async function GET(
 
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -26,8 +26,8 @@ export async function GET(
 
     const nfts = await db
       .select()
-      .from(curatedCollectionNfts)
-      .where(eq(curatedCollectionNfts.curatedCollectionId, collectionId));
+      .from(curatedGalleryNfts)
+      .where(eq(curatedGalleryNfts.curatedGalleryId, collectionId));
 
     return NextResponse.json({
       success: true,
@@ -42,7 +42,7 @@ export async function GET(
         updatedAt: collection.updatedAt.toISOString(),
       },
       nfts: nfts.map(nft => ({
-        curatedCollectionId: nft.curatedCollectionId,
+        curatedGalleryId: nft.curatedGalleryId,
         contractAddress: nft.contractAddress,
         tokenId: nft.tokenId,
         curatorComment: nft.curatorComment,
@@ -82,8 +82,8 @@ export async function PUT(
     // Verify ownership
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -108,9 +108,9 @@ export async function PUT(
     updateData.updatedAt = new Date();
 
     const [updated] = await db
-      .update(curatedCollections)
+      .update(curatedGalleries)
       .set(updateData)
-      .where(eq(curatedCollections.id, collectionId))
+      .where(eq(curatedGalleries.id, collectionId))
       .returning();
 
     return NextResponse.json({
@@ -157,8 +157,8 @@ export async function DELETE(
     // Verify ownership
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -176,8 +176,8 @@ export async function DELETE(
     }
 
     await db
-      .delete(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId));
+      .delete(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

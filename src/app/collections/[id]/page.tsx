@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getDatabase, curatedCollections, curatedCollectionNfts, nftMetadataCache } from '~/lib/db';
+import { getDatabase, curatedGalleries, curatedGalleryNfts, nftMetadataCache } from '~/lib/db';
 import { eq } from 'drizzle-orm';
 import { getNeynarUser } from '~/lib/neynar';
 import { APP_URL, APP_NAME } from '~/lib/constants';
@@ -15,34 +15,34 @@ export async function generateMetadata({
   const collectionId = parseInt(id);
 
   const db = getDatabase();
-  const [collection] = await db
+  const [gallery] = await db
     .select()
-    .from(curatedCollections)
-    .where(eq(curatedCollections.id, collectionId))
+    .from(curatedGalleries)
+    .where(eq(curatedGalleries.id, collectionId))
     .limit(1);
 
-  if (!collection) {
+  if (!gallery) {
     return {
-      title: 'Collection Not Found',
+      title: 'Gallery Not Found',
     };
   }
 
-  const curator = await getNeynarUser(collection.curatorFid);
+  const curator = await getNeynarUser(gallery.curatorFid);
   const ogImageUrl = `${APP_URL}/api/opengraph-image?collectionId=${collectionId}`;
 
   return {
-    title: `${collection.title} | ${APP_NAME}`,
-    description: collection.description || `Curated collection by ${curator?.display_name || curator?.username || 'Unknown'}`,
+    title: `${gallery.title} | ${APP_NAME}`,
+    description: gallery.description || `Curated gallery by ${curator?.display_name || curator?.username || 'Unknown'}`,
     openGraph: {
-      title: collection.title,
-      description: collection.description || undefined,
+      title: gallery.title,
+      description: gallery.description || undefined,
       images: [ogImageUrl],
       url: `${APP_URL}/collections/${collectionId}`,
     },
     twitter: {
       card: 'summary_large_image',
-      title: collection.title,
-      description: collection.description || undefined,
+      title: gallery.title,
+      description: gallery.description || undefined,
       images: [ogImageUrl],
     },
   };
@@ -57,20 +57,20 @@ export default async function CollectionPage({
   const collectionId = parseInt(id);
 
   const db = getDatabase();
-  const [collection] = await db
+  const [gallery] = await db
     .select()
-    .from(curatedCollections)
-    .where(eq(curatedCollections.id, collectionId))
+    .from(curatedGalleries)
+    .where(eq(curatedGalleries.id, collectionId))
     .limit(1);
 
-  if (!collection) {
+  if (!gallery) {
     notFound();
   }
 
   const nfts = await db
     .select()
-    .from(curatedCollectionNfts)
-    .where(eq(curatedCollectionNfts.curatedCollectionId, collectionId));
+    .from(curatedGalleryNfts)
+    .where(eq(curatedGalleryNfts.curatedGalleryId, collectionId));
 
   // Get NFT metadata for display
   const nftsWithMetadata = await Promise.all(
@@ -90,15 +90,15 @@ export default async function CollectionPage({
     })
   );
 
-  const curator = await getNeynarUser(collection.curatorFid);
+  const curator = await getNeynarUser(gallery.curatorFid);
 
   return (
     <div className="container-wide py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">{collection.title}</h1>
-        {collection.description && (
+        <h1 className="text-4xl font-bold mb-2">{gallery.title}</h1>
+        {gallery.description && (
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
-            {collection.description}
+            {gallery.description}
           </p>
         )}
         {curator && (
@@ -111,7 +111,7 @@ export default async function CollectionPage({
       {/* Quote-cast button and referral info */}
       <CollectionActions
         collectionId={collectionId}
-        curatorFid={collection.curatorFid}
+        curatorFid={gallery.curatorFid}
       />
 
       {/* NFTs in collection */}
@@ -145,7 +145,7 @@ export default async function CollectionPage({
 
       {nftsWithMetadata.length === 0 && (
         <p className="text-center text-gray-500 py-12">
-          No NFTs in this collection yet.
+          No NFTs in this gallery yet.
         </p>
       )}
     </div>

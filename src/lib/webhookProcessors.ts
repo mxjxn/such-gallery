@@ -73,7 +73,7 @@ export async function processQuoteCastWebhook(castData: CastData): Promise<{
         curatorFid: castData.author.fid,
         castHash: castData.hash,
         targetType: parsed.type,
-        targetCollectionId: parsed.collectionId || null,
+        targetGalleryId: parsed.collectionId || null,
         targetContractAddress: parsed.contractAddress?.toLowerCase() || null,
         targetTokenId: parsed.tokenId || null,
         referralAddress: referralAddress.toLowerCase(),

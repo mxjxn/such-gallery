@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase, curatedCollections, curatedCollectionNfts } from '~/lib/db';
+import { getDatabase, curatedGalleries, curatedGalleryNfts } from '~/lib/db';
 import { eq, and } from 'drizzle-orm';
 
 // POST /api/collections/[id]/nfts - Add NFT to collection
@@ -24,8 +24,8 @@ export async function POST(
     // Verify ownership
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -45,12 +45,12 @@ export async function POST(
     // Check if NFT already in collection
     const [existing] = await db
       .select()
-      .from(curatedCollectionNfts)
+      .from(curatedGalleryNfts)
       .where(
         and(
-          eq(curatedCollectionNfts.curatedCollectionId, collectionId),
-          eq(curatedCollectionNfts.contractAddress, contractAddress.toLowerCase()),
-          eq(curatedCollectionNfts.tokenId, tokenId)
+          eq(curatedGalleryNfts.curatedGalleryId, collectionId),
+          eq(curatedGalleryNfts.contractAddress, contractAddress.toLowerCase()),
+          eq(curatedGalleryNfts.tokenId, tokenId)
         )
       )
       .limit(1);
@@ -63,9 +63,9 @@ export async function POST(
     }
 
     const [newNft] = await db
-      .insert(curatedCollectionNfts)
+      .insert(curatedGalleryNfts)
       .values({
-        curatedCollectionId: collectionId,
+        curatedGalleryId: collectionId,
         contractAddress: contractAddress.toLowerCase(),
         tokenId: tokenId,
         curatorComment: curatorComment || null,
@@ -77,7 +77,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       nft: {
-        curatedCollectionId: newNft.curatedCollectionId,
+        curatedGalleryId: newNft.curatedGalleryId,
         contractAddress: newNft.contractAddress,
         tokenId: newNft.tokenId,
         curatorComment: newNft.curatorComment,
@@ -119,8 +119,8 @@ export async function DELETE(
     // Verify ownership
     const [collection] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, collectionId))
       .limit(1);
 
     if (!collection) {
@@ -138,12 +138,12 @@ export async function DELETE(
     }
 
     await db
-      .delete(curatedCollectionNfts)
+      .delete(curatedGalleryNfts)
       .where(
         and(
-          eq(curatedCollectionNfts.curatedCollectionId, collectionId),
-          eq(curatedCollectionNfts.contractAddress, contractAddress.toLowerCase()),
-          eq(curatedCollectionNfts.tokenId, tokenId)
+          eq(curatedGalleryNfts.curatedGalleryId, collectionId),
+          eq(curatedGalleryNfts.contractAddress, contractAddress.toLowerCase()),
+          eq(curatedGalleryNfts.tokenId, tokenId)
         )
       );
 

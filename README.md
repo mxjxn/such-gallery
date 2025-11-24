@@ -45,6 +45,8 @@ pnpm db:push
 pnpm dev
 ```
 
+**For complete deployment instructions**, including production deployment and environment variable details, see the [main deployment guide](../../DEPLOYMENT.md#such-gallery).
+
 ## API Routes
 
 ### Collections

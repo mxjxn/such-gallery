@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getDatabase, nftMetadataCache, curatedCollectionNfts, curatedCollections } from '~/lib/db';
+import { getDatabase, nftMetadataCache, curatedGalleryNfts, curatedGalleries } from '~/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { getNeynarUser } from '~/lib/neynar';
 import { APP_URL, APP_NAME } from '~/lib/constants';
@@ -71,31 +71,31 @@ export default async function NFTPage({
     notFound();
   }
 
-  // Get collection info if NFT is in a collection
-  const [collectionNft] = await db
+  // Get gallery info if NFT is in a gallery
+  const [galleryNft] = await db
     .select()
-    .from(curatedCollectionNfts)
+    .from(curatedGalleryNfts)
     .where(
       and(
-        eq(curatedCollectionNfts.contractAddress, normalizedAddress),
-        eq(curatedCollectionNfts.tokenId, tokenId)
+        eq(curatedGalleryNfts.contractAddress, normalizedAddress),
+        eq(curatedGalleryNfts.tokenId, tokenId)
       )
     )
     .limit(1);
 
-  let collection = null;
+  let gallery = null;
   let curator = null;
 
-  if (collectionNft) {
-    const [collectionData] = await db
+  if (galleryNft) {
+    const [galleryData] = await db
       .select()
-      .from(curatedCollections)
-      .where(eq(curatedCollections.id, collectionNft.curatedCollectionId))
+      .from(curatedGalleries)
+      .where(eq(curatedGalleries.id, galleryNft.curatedGalleryId))
       .limit(1);
 
-    if (collectionData) {
-      collection = collectionData;
-      curator = await getNeynarUser(collectionData.curatorFid);
+    if (galleryData) {
+      gallery = galleryData;
+      curator = await getNeynarUser(galleryData.curatorFid);
     }
   }
 
@@ -129,14 +129,14 @@ export default async function NFTPage({
             </p>
           )}
 
-          {collection && (
+          {gallery && (
             <div className="mb-6">
-              <p className="text-sm text-gray-500 mb-1">From Collection</p>
+              <p className="text-sm text-gray-500 mb-1">From Gallery</p>
               <a
-                href={`/collections/${collection.id}`}
+                href={`/collections/${gallery.id}`}
                 className="text-primary hover:underline font-semibold"
               >
-                {collection.title}
+                {gallery.title}
               </a>
               {curator && (
                 <p className="text-sm text-gray-500 mt-1">
@@ -146,11 +146,11 @@ export default async function NFTPage({
             </div>
           )}
 
-          {collectionNft?.curatorComment && (
+          {galleryNft?.curatorComment && (
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-sm font-semibold mb-2">Curator's Note</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                {collectionNft.curatorComment}
+                {galleryNft.curatorComment}
               </p>
             </div>
           )}
@@ -159,7 +159,7 @@ export default async function NFTPage({
           <NFTActions
             contractAddress={contractAddress}
             tokenId={tokenId}
-            curatorFid={collection?.curatorFid}
+            curatorFid={gallery?.curatorFid}
           />
 
           {/* NFT Details */}

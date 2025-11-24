@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase, suchGalleryUsers, curatedCollections } from '~/lib/db';
+import { getDatabase, suchGalleryUsers, curatedGalleries } from '~/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { getNeynarUser } from '~/lib/neynar';
 
@@ -11,12 +11,12 @@ export async function GET(request: NextRequest) {
     const publishedOnly = searchParams.get('publishedOnly') === 'true';
 
     const db = getDatabase();
-    let query = db.select().from(curatedCollections);
+    let query = db.select().from(curatedGalleries);
 
     if (curatorFid) {
-      query = query.where(eq(curatedCollections.curatorFid, parseInt(curatorFid)));
+      query = query.where(eq(curatedGalleries.curatorFid, parseInt(curatorFid)));
     } else if (publishedOnly) {
-      query = query.where(eq(curatedCollections.isPublished, true));
+      query = query.where(eq(curatedGalleries.isPublished, true));
     }
 
     const collections = await query;
@@ -73,11 +73,11 @@ export async function POST(request: NextRequest) {
     // Check if slug already exists for this curator
     const [existingCollection] = await db
       .select()
-      .from(curatedCollections)
+      .from(curatedGalleries)
       .where(
         and(
-          eq(curatedCollections.curatorFid, curatorFid),
-          eq(curatedCollections.slug, slug)
+          eq(curatedGalleries.curatorFid, curatorFid),
+          eq(curatedGalleries.slug, slug)
         )
       )
       .limit(1);
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     const [newCollection] = await db
-      .insert(curatedCollections)
+      .insert(curatedGalleries)
       .values({
         curatorFid,
         title,
